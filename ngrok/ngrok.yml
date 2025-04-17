@@ -1,0 +1,6 @@
+authtoken: AUTHTOKEN_HERE
+region: us
+tunnels:
+  webapp:
+    proto: http
+    addr: web:3000
