@@ -7,9 +7,22 @@ dotenv.config();
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-app.use(express.json());
-app.use(express.static(__dirname)); // serve index.html
 
+// Serve static files (like styles, images if needed)
+app.use(express.static(__dirname));
+app.use(express.json());
+
+// Serve the index.html file when the root URL is accessed
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Serve the alternative index2.html file when the /alt URL is accessed
+app.get("/alt", (req, res) => {
+  res.sendFile(path.join(__dirname, "index2.html"));
+});
+
+//
 app.post("/api/chat", async (req, res) => {
   const userMessage = req.body.message;
 
@@ -25,6 +38,7 @@ app.post("/api/chat", async (req, res) => {
         messages: [{ role: "user", content: userMessage }]
       })
     });
+
     const json = await result.json();
     res.json({ reply: json.choices[0].message.content });
   } catch (err) {
@@ -32,4 +46,4 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("Web server running on port 3000"));
+app.listen(3000, () => console.log("✅ Web server running on port 3000"));
