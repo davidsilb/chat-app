@@ -22,28 +22,40 @@ app.get("/alt", (req, res) => {
   res.sendFile(path.join(__dirname, "index2.html"));
 });
 
-//
+// Chat API handler
 app.post("/api/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    const result = await fetch("https://api.openai.com/v1/chat/completions", {
+    const result = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "llama3-8b-8192", // or "mixtral-8x7b", "gemma-7b-it"
         messages: [{ role: "user", content: userMessage }]
       })
     });
 
     const json = await result.json();
+
+    // Debug raw output
+    console.log("Groq raw response:", JSON.stringify(json, null, 2));
+
+    if (!json.choices || !json.choices[0]) {
+      console.error("Groq API response error:", JSON.stringify(json, null, 2));
+      return res.status(500).json({ reply: "Groq API error: No choices returned." });
+    }
+
     res.json({ reply: json.choices[0].message.content });
   } catch (err) {
-    res.status(500).json({ reply: "Error talking to AI." });
+    console.error("Error from Groq:", err);
+    res.status(500).json({ reply: "Error talking to AI Groq." });
   }
 });
 
-app.listen(3000, () => console.log("✅ Web server running on port 3000"));
+// Start server
+console.log("GROQ_API_KEY exists:", !!process.env.GROQ_API_KEY);
+app.listen(3000, () => console.log("Web server running on port 3000"));
