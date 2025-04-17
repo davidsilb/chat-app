@@ -42,8 +42,9 @@ app.post("/api/chat", async (req, res) => {
     const json = await result.json();
     res.json({ reply: json.choices[0].message.content });
   } catch (err) {
-    res.status(500).json({ reply: "Error talking to AI." });
+    console.error("Error from Groq:", err);
+    res.status(500).json({ reply: "Error talking to AI Groq." });
   }
 });
-
+console.log("GROQ_API_KEY exists:", !!process.env.GROQ_API_KEY);
 app.listen(3000, () => console.log("Web server running on port 3000"));
