@@ -15,6 +15,5 @@ services:
     volumes:
       - ./ngrok/ngrok.yml:/ngrok.yml
     command: start --config /ngrok.yml --all
-    #ports:
-    #  - "4040:4040"  # Ngrok web interface
-    #  - "80:80"      # HTTP tunnel
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}

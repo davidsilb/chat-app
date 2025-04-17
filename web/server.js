@@ -27,14 +27,14 @@ app.post("/api/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    const result = await fetch("https://api.openai.com/v1/chat/completions", {
+    const result = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "mixtral-8x7b-32768", // or gemma-7b-it, llama3-8b-8192
         messages: [{ role: "user", content: userMessage }]
       })
     });
@@ -46,4 +46,4 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("✅ Web server running on port 3000"));
+app.listen(3000, () => console.log("Web server running on port 3000"));
