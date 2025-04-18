@@ -9,13 +9,10 @@ services:
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
 
-  ngrok:
-    image: ngrok/ngrok:latest
-    container_name: ngrok-container
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
     depends_on:
       - web
-    volumes:
-      - ./ngrok/ngrok.yml:/etc/ngrok.yml
-    command: start --config /etc/ngrok.yml --all
-    environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    #command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} // for registering one, tested
+    command: tunnel --url http://web:3000
