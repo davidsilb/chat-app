@@ -14,4 +14,5 @@ services:
     container_name: cloudflared-tunnel
     depends_on:
       - web
+    #command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} // for registering one, tested
     command: tunnel --url http://web:3000
