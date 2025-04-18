@@ -4,4 +4,5 @@ tunnels:
   webapp:
     proto: http
     addr: web:3000
+    inspect: false
     

@@ -15,7 +15,7 @@ services:
     depends_on:
       - web
     volumes:
-      - ./ngrok/ngrok.yml:/ngrok.yml
-    command: start --config /ngrok.yml --all
+      - ./ngrok/ngrok.yml:/etc/ngrok.yml
+    command: start --config /etc/ngrok.yml --all
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
