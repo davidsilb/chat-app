@@ -40,11 +40,14 @@
     <form id="chatForm" class="mb-4">
       <div class="form-group">
         <label>Select AI Services:</label>
+        <div class="mb-2">
+          <button id="selectAll" type="button" class="btn btn-sm btn-outline-primary">Select All</button>
+          <button id="deselectAll" type="button" class="btn btn-sm btn-outline-secondary">Deselect All</button>
+        </div>
         <div class="services-list">
           <label><input type="checkbox" name="aiServices" value="compound-beta-mini"> compound-beta-mini</label>
           <label><input type="checkbox" name="aiServices" value="meta-llama_llama-4-maverick-17b-128e-instruct"> meta-llama/llama-4-maverick-17b-128e-instruct</label>
           <label><input type="checkbox" name="aiServices" value="qwen-qwq-32b"> qwen-qwq-32b</label>
-          <label><input type="checkbox" name="aiServices" value="allam-2-7b"> allam-2-7b</label>
           <label><input type="checkbox" name="aiServices" value="llama3-8b-8192"> llama3-8b-8192</label>
           <label><input type="checkbox" name="aiServices" value="gemma2-9b-it"> gemma2-9b-it</label>
           <label><input type="checkbox" name="aiServices" value="deepseek-r1-distill-llama-70b"> deepseek-r1-distill-llama-70b</label>
@@ -78,7 +81,6 @@
       "compound-beta-mini": "/api/chat/compound-beta-mini",
       "meta-llama_llama-4-maverick-17b-128e-instruct": "/api/chat/meta-llama_llama-4-maverick-17b-128e-instruct",
       "qwen-qwq-32b": "/api/chat/qwen-qwq-32b",
-      "allam-2-7b": "/api/chat/allam-2-7b",
       "llama3-8b-8192": "/api/chat/llama3-8b-8192",
       "gemma2-9b-it": "/api/chat/gemma2-9b-it",
       "deepseek-r1-distill-llama-70b": "/api/chat/deepseek-r1-distill-llama-70b",
@@ -159,6 +161,16 @@
       link.download = "responses.csv";
       link.click();
     };
+
+    const serviceCheckboxes = () =>
+      document.querySelectorAll("input[name='aiServices']");
+
+    document.getElementById("selectAll").addEventListener("click", () => {
+      serviceCheckboxes().forEach(cb => cb.checked = true);
+    });
+    document.getElementById("deselectAll").addEventListener("click", () => {
+      serviceCheckboxes().forEach(cb => cb.checked = false);
+    });
   </script>
 </body>
 </html>

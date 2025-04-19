@@ -1,5 +1,5 @@
 # Use the slim Alpine base image
-FROM node:23-alpine
+FROM node:23-slim
 
 # Set the working directory
 WORKDIR /app

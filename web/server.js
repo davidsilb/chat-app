@@ -5,17 +5,16 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 dotenv.config();
 
-const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
+
+console.log("....server.js loading…");
+
+app.get("/ping", (_req, res) => res.send("pong"));
 
 app.use(express.static(__dirname));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// List of text-only models with their route names
 const textModels = [
   { route: "compound-beta-mini", model: "compound-beta-mini" },
   {
@@ -23,7 +22,6 @@ const textModels = [
     model: "meta-llama/llama-4-maverick-17b-128e-instruct"
   },
   { route: "qwen-qwq-32b", model: "qwen-qwq-32b" },
-  { route: "allam-2-7b", model: "allam-2-7b" },
   { route: "llama3-8b-8192", model: "llama3-8b-8192" },
   { route: "gemma2-9b-it", model: "gemma2-9b-it" },
   {
@@ -44,7 +42,6 @@ const textModels = [
   }
 ];
 
-// Handler factory
 function groqHandler(modelName) {
   return async (req, res) => {
     const userMessage = req.body.message;
@@ -63,37 +60,25 @@ function groqHandler(modelName) {
           })
         }
       );
-
       const json = await result.json();
-      console.log(`[${modelName}]`, JSON.stringify(json, null, 2));
-
+      console.log(`[${modelName}] reply →`, json.choices?.[0]?.message?.content);
       const content = json.choices?.[0]?.message?.content;
       if (!content) {
-        return res
-          .status(500)
-          .json({ reply: `No response from ${modelName}` });
+        return res.status(500).json({ reply: `No response from ${modelName}` });
       }
-
       res.json({ reply: content });
     } catch (err) {
       console.error(`[${modelName}] error:`, err);
-      res
-        .status(500)
-        .json({ reply: `Error calling model ${modelName}` });
+      res.status(500).json({ reply: `Error calling ${modelName}` });
     }
   };
 }
 
-// Dynamically register routes
-textModels.forEach(({ route, model }) => {
-  app.post(`/api/chat/${route}`, groqHandler(model));
-});
-
-console.log(
-  "GROQ_API_KEY loaded?",
-  !!process.env.GROQ_API_KEY
+textModels.forEach(({ route, model }) =>
+  app.post(`/api/chat/${route}`, groqHandler(model))
 );
 
-app.listen(3000, () =>
-  console.log("Server running at http://localhost:3000")
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`....Server listening on http://0.0.0.0:${PORT}`)
 );
