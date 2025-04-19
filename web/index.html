@@ -21,6 +21,15 @@
       margin-bottom: 10px;
       font-size: 12px;
     }
+    .services-list {
+      max-height: 200px;
+      overflow-y: scroll;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    .services-list label {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -30,12 +39,22 @@
 
     <form id="chatForm" class="mb-4">
       <div class="form-group">
-        <label>Select AI Services:</label><br/>
-        <input type="checkbox" name="aiServices" value="llama3-8b"> LLaMA 3 (8B)
-        <input type="checkbox" name="aiServices" value="llama3-70b"> LLaMA 3 (70B)
-        <input type="checkbox" name="aiServices" value="gemma2-9b"> Gemma 2 (9B)
-        <input type="checkbox" name="aiServices" value="llama3.1-8b"> LLaMA 3.1 (8B Instant)
-        <input type="checkbox" name="aiServices" value="llama3.3-70b"> LLaMA 3.3 (70B Versatile)
+        <label>Select AI Services:</label>
+        <div class="services-list">
+          <label><input type="checkbox" name="aiServices" value="compound-beta-mini"> compound-beta-mini</label>
+          <label><input type="checkbox" name="aiServices" value="meta-llama_llama-4-maverick-17b-128e-instruct"> meta-llama/llama-4-maverick-17b-128e-instruct</label>
+          <label><input type="checkbox" name="aiServices" value="qwen-qwq-32b"> qwen-qwq-32b</label>
+          <label><input type="checkbox" name="aiServices" value="allam-2-7b"> allam-2-7b</label>
+          <label><input type="checkbox" name="aiServices" value="llama3-8b-8192"> llama3-8b-8192</label>
+          <label><input type="checkbox" name="aiServices" value="gemma2-9b-it"> gemma2-9b-it</label>
+          <label><input type="checkbox" name="aiServices" value="deepseek-r1-distill-llama-70b"> deepseek-r1-distill-llama-70b</label>
+          <label><input type="checkbox" name="aiServices" value="llama3-70b-8192"> llama3-70b-8192</label>
+          <label><input type="checkbox" name="aiServices" value="mistral-saba-24b"> mistral-saba-24b</label>
+          <label><input type="checkbox" name="aiServices" value="compound-beta"> compound-beta</label>
+          <label><input type="checkbox" name="aiServices" value="llama-3.1-8b-instant"> llama-3.1-8b-instant</label>
+          <label><input type="checkbox" name="aiServices" value="llama-3.3-70b-versatile"> llama-3.3-70b-versatile</label>
+          <label><input type="checkbox" name="aiServices" value="meta-llama_llama-4-scout-17b-16e-instruct"> meta-llama/llama-4-scout-17b-16e-instruct</label>
+        </div>
       </div>
       <div class="form-group">
         <label for="msg">Enter your message:</label>
@@ -56,94 +75,90 @@
 
   <script>
     const modelEndpointMap = {
-      "llama3-8b": "/api/chat/llama3-8b",
-      "llama3-70b": "/api/chat/llama3-70b",
-      "gemma2-9b": "/api/chat/gemma2-9b",
-      "llama3.1-8b": "/api/chat/llama3.1-8b",
-      "llama3.3-70b": "/api/chat/llama3.3-70b"
+      "compound-beta-mini": "/api/chat/compound-beta-mini",
+      "meta-llama_llama-4-maverick-17b-128e-instruct": "/api/chat/meta-llama_llama-4-maverick-17b-128e-instruct",
+      "qwen-qwq-32b": "/api/chat/qwen-qwq-32b",
+      "allam-2-7b": "/api/chat/allam-2-7b",
+      "llama3-8b-8192": "/api/chat/llama3-8b-8192",
+      "gemma2-9b-it": "/api/chat/gemma2-9b-it",
+      "deepseek-r1-distill-llama-70b": "/api/chat/deepseek-r1-distill-llama-70b",
+      "llama3-70b-8192": "/api/chat/llama3-70b-8192",
+      "mistral-saba-24b": "/api/chat/mistral-saba-24b",
+      "compound-beta": "/api/chat/compound-beta",
+      "llama-3.1-8b-instant": "/api/chat/llama-3.1-8b-instant",
+      "llama-3.3-70b-versatile": "/api/chat/llama-3.3-70b-versatile",
+      "meta-llama_llama-4-scout-17b-16e-instruct": "/api/chat/meta-llama_llama-4-scout-17b-16e-instruct"
     };
 
-    let currentData = {
-      message: '',
-      responses: []
-    };
+    let currentData = { message: '', responses: [] };
 
     document.getElementById("chatForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const message = document.getElementById("msg").value.trim();
-      const selected = Array.from(document.querySelectorAll("input[name='aiServices']:checked")).map(cb => cb.value);
+      const selected = Array.from(document.querySelectorAll("input[name='aiServices']:checked"))
+                            .map(cb => cb.value);
 
       if (!message) return alert("Please enter a message.");
       if (selected.length === 0) return alert("Please select at least one AI service.");
 
       const responsesDiv = document.getElementById("responses");
       responsesDiv.innerHTML = "";
-      currentData.message = message;
-      currentData.responses = [];
+      currentData = { message, responses: [] };
 
-      const fetches = selected.map(async (service) => {
-        const endpoint = modelEndpointMap[service];
+      // verify every service has an endpoint
+      for (let svc of selected) {
+        if (!modelEndpointMap[svc]) {
+          return alert(`No endpoint defined for "${svc}".`);
+        }
+      }
+
+      await Promise.all(selected.map(async svc => {
         try {
-          const res = await fetch(endpoint, {
+          const res = await fetch(modelEndpointMap[svc], {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message })
           });
-          const data = await res.json();
-          const reply = data.reply || "No reply received.";
+          const { reply = "No reply received." } = await res.json();
 
-          currentData.responses.push({
-            service,
-            response: reply,
-            timestamp: new Date().toISOString()
-          });
+          currentData.responses.push({ service: svc, response: reply, timestamp: new Date().toISOString() });
 
           const div = document.createElement("div");
           div.className = "response";
-          div.innerHTML = `<h5>${service.toUpperCase()}</h5><p>${reply}</p>`;
+          div.innerHTML = `<h5>${svc}</h5><p>${reply}</p>`;
           responsesDiv.appendChild(div);
         } catch (err) {
-          console.error(`Error from ${service}:`, err);
+          console.error(`Error from ${svc}:`, err);
+          const errDiv = document.createElement("div");
+          errDiv.className = "response";
+          errDiv.innerHTML = `<h5>${svc}</h5><p style="color:red;">Error: ${err.message}</p>`;
+          responsesDiv.appendChild(errDiv);
         }
-      });
-
-      await Promise.all(fetches);
+      }));
     });
 
-    document.getElementById("gridView").addEventListener("click", () => {
-      const resDiv = document.getElementById("responses");
-      resDiv.classList.remove("list-layout");
-      resDiv.classList.add("grid-layout");
-    });
-
-    document.getElementById("listView").addEventListener("click", () => {
-      const resDiv = document.getElementById("responses");
-      resDiv.classList.remove("grid-layout");
-      resDiv.classList.add("list-layout");
-    });
-
-    document.getElementById("exportCSV").addEventListener("click", () => {
-      if (!currentData.message || currentData.responses.length === 0) {
-        alert("No data to export.");
-        return;
+    document.getElementById("gridView").onclick = () => {
+      const r = document.getElementById("responses");
+      r.classList.replace("list-layout", "grid-layout");
+    };
+    document.getElementById("listView").onclick = () => {
+      const r = document.getElementById("responses");
+      r.classList.replace("grid-layout", "list-layout");
+    };
+    document.getElementById("exportCSV").onclick = () => {
+      if (!currentData.message || !currentData.responses.length) {
+        return alert("No data to export.");
       }
-
       let csv = "Message,Service,Response,Timestamp\n";
-      currentData.responses.forEach(({ service, response, timestamp }) => {
-        const row = [currentData.message, service, response.replace(/"/g, '""'), timestamp]
-          .map(val => `"${val}"`).join(",");
-        csv += row + "\n";
+      currentData.responses.forEach(({service,response,timestamp}) => {
+        csv += [`"${currentData.message}"`,`"${service}"`,`"${response.replace(/"/g,'""')}"`,`"${timestamp}"`].join(",") + "\n";
       });
-
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csv], { type: "text/csv" });
       const link = document.createElement("a");
-      link.setAttribute("href", URL.createObjectURL(blob));
-      link.setAttribute("download", "responses.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
+      link.href = URL.createObjectURL(blob);
+      link.download = "responses.csv";
       link.click();
-      document.body.removeChild(link);
-    });
+    };
   </script>
 </body>
 </html>

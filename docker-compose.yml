@@ -1,9 +1,9 @@
-version: '3'
-
 services:
   web:
     build: ./web
     container_name: web-container
+    ports:
+      - "3000:3000"
     expose:
       - "3000"
     environment:
@@ -16,3 +16,13 @@ services:
       - web
     #command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} // for registering one, tested
     command: tunnel --url http://web:3000
+
+  groq-models:
+    build:
+      context: ./groq-model-checker
+    container_name: groq-model-checker
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    profiles: ["dev"]  # prevent start || docker-compose --profile dev up --build
+    command: ["sh", "-c", "node fetchGroqModels.js"] #comment out to run longer
+    restart: "no" #comment out to run longer
