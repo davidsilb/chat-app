@@ -34,12 +34,14 @@ A multi-container application that combines:
    GROQ_API_KEY=your_groq_api_key_here
    CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
    ```
+   
    - **Using CMD (Windows):**
 
   ```cmd
   echo GROQ_API_KEY=your_groq_api_key_here > .env
   echo CLOUDFLARED_TOKEN=your_cloudflared_token_here >> .env
   ```
+
     - **Using Bash (Linux):**
 
   ```bash
