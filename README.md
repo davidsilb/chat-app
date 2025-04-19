@@ -71,15 +71,18 @@ A multi-container application that combines:
 ```bash
 .
 ├── docker-compose.yml            # Multi-container setup
+├── README.md                     # HELLO WORLD =)
+├── .gitignore                    # ignore the .env =)
 ├── .env                          # Environment variables (not committed)
 ├── groq-model-checker/
+│   ├── Dockerfile                # Docker build for Groq model checker
 │   ├── package.json              # Groq model checker dependencies
 │   └── fetchGroqModels.js        # CLI script to list Groq models
-├── server/
-│   ├── package.json              # Express server dependencies
-│   └── server.js                 # Express app defining `/api/chat/*` routes
 └── web/
-    └── index.html                # Frontend UI for chat compiler
+    ├── Dockerfile                # Docker build for frontend + backend
+    ├── package.json              # Express server dependencies
+    ├── index.html                # Frontend UI for chat compiler
+    └── server.js                 # Express app defining `/api/chat/*` routes
 ```
 
 ## Frontend Usage
