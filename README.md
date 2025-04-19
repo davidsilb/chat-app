@@ -34,20 +34,20 @@ A multi-container application that combines:
    GROQ_API_KEY=your_groq_api_key_here
    CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
    ```
-   
-   - **Using CMD (Windows):**
 
-  ```cmd
-  echo GROQ_API_KEY=your_groq_api_key_here > .env
-  echo CLOUDFLARED_TOKEN=your_cloudflared_token_here >> .env
-  ```
+   **Using CMD (Windows):**
 
-    - **Using Bash (Linux):**
+   ```cmd
+   echo GROQ_API_KEY=your_groq_api_key_here > .env
+   echo CLOUDFLARED_TOKEN=your_cloudflared_token_here >> .env
+   ```
 
-  ```bash
-  echo "GROQ_API_KEY=your_groq_api_key_here" > .env
-  echo "CLOUDFLARED_TOKEN=your_cloudflared_token_here" >> .env
-  ```
+   **Using Bash (Linux):**
+
+   ```bash
+   echo "GROQ_API_KEY=your_groq_api_key_here" > .env
+   echo "CLOUDFLARED_TOKEN=your_cloudflared_token_here" >> .env
+   ```
 
 3. **Build and run all services**
 
