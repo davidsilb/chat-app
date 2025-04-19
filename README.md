@@ -24,8 +24,8 @@ A multi-container application that combines:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   git clone https://github.com/davidsilb/chat-app.git
+   cd chat-app
    ```
 
 2. **Create your `.env` file**
@@ -34,6 +34,18 @@ A multi-container application that combines:
    GROQ_API_KEY=your_groq_api_key_here
    CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
    ```
+   - **Using CMD (Windows):**
+
+  ```cmd
+  echo GROQ_API_KEY=your_groq_api_key_here > .env
+  echo CLOUDFLARED_TOKEN=your_cloudflared_token_here >> .env
+  ```
+    - **Using Bash (Linux):**
+
+  ```bash
+  echo "GROQ_API_KEY=your_groq_api_key_here" > .env
+  echo "CLOUDFLARED_TOKEN=your_cloudflared_token_here" >> .env
+  ```
 
 3. **Build and run all services**
 
