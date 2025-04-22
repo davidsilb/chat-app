@@ -7,7 +7,7 @@ A multi-container application that combines:
 
 ## Known bugs & solutions
 
-- Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.
+- ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
 
    ```bash
    docker-compose down --volumes --remove-orphans
