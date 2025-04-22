@@ -8,11 +8,19 @@ services:
       - "3000"
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
+    restart: "no"
+    init: true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel
     depends_on:
-      - web
-    #command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} // for registering one, tested
+      web:
+        condition: service_healthy
     command: tunnel --url http://web:3000
+    restart: "no"
