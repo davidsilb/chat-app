@@ -1,9 +1,21 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
+
+import mongoose from "mongoose";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-dotenv.config();
+import ChatSession from "./mongo/ChatSession.js";
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("Connected to MongoDB"))
+.catch(err => {
+  console.error("Failed to connect to MongoDB:", err);
+  process.exit(1);
+});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -45,6 +57,7 @@ const textModels = [
 function groqHandler(modelName) {
   return async (req, res) => {
     const userMessage = req.body.message;
+
     try {
       const result = await fetch(
         "https://api.groq.com/openai/v1/chat/completions",
@@ -60,19 +73,45 @@ function groqHandler(modelName) {
           })
         }
       );
+
       const json = await result.json();
-      console.log(`[${modelName}] reply →`, json.choices?.[0]?.message?.content);
       const content = json.choices?.[0]?.message?.content;
+
       if (!content) {
-        return res.status(500).json({ reply: `No response from ${modelName}` });
+        console.error(`[${modelName}] bad response:`, JSON.stringify(json, null, 2));
+        return res.status(500).json({ reply: `No valid response from ${modelName}` });
       }
+
+      console.log(`[${modelName}] reply →`, content);
+
+      // Save the chat to MongoDB
+      await ChatSession.create({
+        userId: "temp-user-id", // Replace with actual session or user ID logic later
+        messages: [
+          { role: "user", content: userMessage },
+          { role: "assistant", content }
+        ]
+      });
+
+      // Send the successful response
       res.json({ reply: content });
+
     } catch (err) {
       console.error(`[${modelName}] error:`, err);
       res.status(500).json({ reply: `Error calling ${modelName}` });
     }
   };
 }
+
+app.get("/api/history/:userId", async (req, res) => {
+  try {
+    const chats = await ChatSession.find({ userId: req.params.userId });
+    res.json(chats);
+  } catch (err) {
+    console.error("Error fetching history:", err);
+    res.status(500).json({ error: "Failed to fetch history" });
+  }
+});
 
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))
