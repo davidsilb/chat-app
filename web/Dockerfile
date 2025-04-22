@@ -1,10 +1,14 @@
-# Use the slim Alpine base image
+# Use the Debian slim base image
 FROM node:23-slim
+
+# Install curl for healthchecks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
 
 # Optional: Install bash if needed by scripts (safe to skip if not needed)
+# this only works for alphine based images not debian based images
 # RUN apk add --no-cache bash
 
 # Install only production dependencies (skip devDeps)
