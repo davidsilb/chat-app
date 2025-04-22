@@ -83,18 +83,21 @@ const server = app.listen(PORT, "0.0.0.0", () =>
   console.log(`....Server listening on http://0.0.0.0:${PORT}`)
 );
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received: shutting down gracefully');
+function shutdown(signal) {
+  console.log(`${signal} received: shutting down gracefully`);
   server.close(() => {
     console.log('HTTP server closed');
     process.exit(0);
   });
-});
+}
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received: shutting down gracefully');
-  server.close(() => {
-    console.log('HTTP server closed');
-    process.exit(0);
-  });
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  shutdown('Uncaught Exception');
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  shutdown('Unhandled Rejection');
 });
