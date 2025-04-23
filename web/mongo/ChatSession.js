@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema({
   userId: String,
-  messages: [{
-    role: String,
+  prompt: String,
+  responses: [{
+    model: String,
     content: String,
     timestamp: { type: Date, default: Date.now }
   }],

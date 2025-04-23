@@ -8,7 +8,23 @@ A multi-container application that combines:
 
 ## Known bugs & solutions
 
-- mongoDB has just been setup, no testing done, unknown status besides it the docker completes a build
+- mongoDB has just been setup, testing done, saves to db; testing steps below
+
+   ```bash
+    docker exec -it mongo-db mongosh
+   ```
+
+   ```bash
+   use chatai
+   ```
+
+   ```bash
+   show collections
+   ```
+
+   ```bash
+   db.chatsessions.find().pretty()
+   ```
 
 - ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
 

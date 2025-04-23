@@ -58,10 +58,14 @@ function groqHandler(modelName) {
   return async (req, res) => {
     const userMessage = req.body.message;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
     try {
       const result = await fetch(
         "https://api.groq.com/openai/v1/chat/completions",
         {
+          signal: controller.signal,
           method: "POST",
           headers: {
             Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
@@ -73,6 +77,11 @@ function groqHandler(modelName) {
           })
         }
       );
+      clearTimeout(timeout);
+      if (!result.ok) {
+        console.error(`[${modelName}] non-200 response:`, result.status, await result.text());
+        return res.status(500).json({ reply: `Upstream error from ${modelName}` });
+      }
 
       const json = await result.json();
       const content = json.choices?.[0]?.message?.content;
@@ -86,23 +95,29 @@ function groqHandler(modelName) {
 
       // Save the chat to MongoDB
       await ChatSession.create({
-        userId: "temp-user-id", // Replace with actual session or user ID logic later
-        messages: [
-          { role: "user", content: userMessage },
-          { role: "assistant", content }
-        ]
+        userId: req.body.userId || "tempUser",
+        prompt: userMessage,
+        responses: [{
+          model: modelName,
+          content,
+        }]
       });
 
       // Send the successful response
       res.json({ reply: content });
 
     } catch (err) {
+      if (err.name === 'AbortError') {
+        console.error(`[${modelName}] timeout error:`, err);
+        return res.status(504).json({ reply: `${modelName} timed out` });
+      }
       console.error(`[${modelName}] error:`, err);
       res.status(500).json({ reply: `Error calling ${modelName}` });
     }
   };
 }
 
+//for future use possibly, unused as of now
 app.get("/api/history/:userId", async (req, res) => {
   try {
     const chats = await ChatSession.find({ userId: req.params.userId });
