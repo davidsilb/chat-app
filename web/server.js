@@ -12,7 +12,7 @@ console.log("....server.js loading…");
 
 app.get("/ping", (_req, res) => res.send("pong"));
 
-app.use(express.static(path.join(__dirname, "web")));
+app.use(express.static(__dirname));
 
 app.use(express.json());
 
