@@ -6,7 +6,7 @@ A multi-container application that combines:
 2. **Cloudflared tunnel** – a tunnel to push http://0.0.0.0:3000 to public.
 3. **mongoDB** – a non-relational db to store stuff, using moongoose to interface with.
 
-## Known bugs & solutions
+## DEV_Log
 
 - mongoDB has just been setup, testing done, saves to db; testing steps below
 
@@ -28,12 +28,26 @@ A multi-container application that combines:
 
 - ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
 
+- commands to clear up docker issues
+
    ```bash
    docker-compose down --volumes --remove-orphans
    ```
 
    ```bash
    docker-compose build --no-cache
+   ```
+
+   ```bash
+   docker builder prune --all --force  # removes ALL build cache
+   ```
+
+   ```bash
+   docker volume prune --force         # removes unused volumes not currently attached to containers
+   ```
+
+   ```bash
+   docker image prune --all --force    # removes unused images (not just dangling)
    ```
 
 ## Features
