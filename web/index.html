@@ -30,12 +30,18 @@
     .services-list label {
       display: block;
     }
+    .scrollable-table {
+    max-height: 100px; /* Set the desired height for the scrollable area */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid #ddd; /* Optional: Add a border around the scrollable area */
+  }
   </style>
 </head>
 <body>
   <div class="container">
     <h1 class="my-4">Chat AI Compiler</h1>
     <p>Select AI services, type a question, and get responses.</p>
+    <div class="scrollable-table">
     <table class="table table-bordered" style="height: 100px; width: auto">
       <thead>
         <tr>
@@ -46,6 +52,7 @@
       <tbody id="table-body">
       </tbody>
     </table>
+    </div>
     <form id="chatForm" class="mb-4">
       <div class="form-group">
         <label>Select AI Services:</label>
@@ -165,7 +172,7 @@
 
           const div = document.createElement("div");
           div.className = "response";
-          div.innerHTML = `<h5>${svc}<button class="btn btn-primary" onclick="increment()">Rate Me</button></h5><p>${reply}</p>`;
+          div.innerHTML = `<h5>${svc}<button class="btn btn-primary ms-3" onclick="increment('${svc}')">Rate Me</button></h5><p>${reply}</p>`;
           responsesDiv.appendChild(div);
         } catch (err) {
           console.error(`Error from ${svc}:`, err);
@@ -199,6 +206,23 @@
       link.download = "responses.csv";
       link.click();
     };
+  function increment(svc) {
+  // Find the AI_data entry for the given svc
+    const aiEntry = AI_data.find(item => item.name === svc);
+    if (aiEntry) {
+      aiEntry.rating += 1; // Increment the rating
+      console.log(`${svc} rating incremented to ${aiEntry.rating}`);
+      // Update the leaderboard dynamically
+    const tableRow = Array.from(document.querySelectorAll("#table-body tr"))
+      .find(row => row.firstChild.textContent === svc);
+    if (tableRow) {
+      tableRow.lastChild.textContent = aiEntry.rating; // Update the rating cell
+    }
+    } 
+    else {
+      console.error(`Service "${svc}" not found in AI_data.`);
+    }
+  }
 
     const serviceCheckboxes = () =>
       document.querySelectorAll("input[name='aiServices']");
