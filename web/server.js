@@ -25,7 +25,10 @@ console.log("....server.js loading…");
 
 app.get("/ping", (_req, res) => res.send("pong"));
 
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 app.use(express.json());
 app.use("/api", exportTxtRouter);
 

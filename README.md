@@ -108,10 +108,11 @@ A multi-container application that combines:
 └── web/
     ├── Dockerfile                # Docker build for frontend + backend
     ├── package.json              # Express server dependencies
-    ├── index.html                # Frontend UI for chat compiler
     ├── server.js                 # Express app defining `/api/chat/*` routes
+    ├── public/
+    │   └── index.html            # Frontend UI for chat compiler
     └── mongo/
-         └── ChatSessions.js      # seperate to avoid issues in server.js
+        └── ChatSessions.js       # Separate to avoid issues in server.js
 ```
 
 ## Frontend Usage
