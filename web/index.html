@@ -71,6 +71,7 @@
         <button id="gridView" class="btn btn-secondary">Grid View</button>
         <button id="listView" class="btn btn-secondary">List View</button>
         <button id="exportCSV" class="btn btn-secondary">Export to CSV</button>
+        <button id="exportTXT" class="btn btn-secondary">Export to TXT</button>
       </div>
       <div id="responses" class="grid-layout"></div>
     </div>
@@ -162,6 +163,29 @@
       link.click();
     };
 
+   document.getElementById("exportTXT").onclick = () => {
+      if (!currentData.message || !currentData.responses.length) {
+      return alert("No data to export.");
+  }
+
+  let txt = "";
+
+  currentData.responses.forEach(({ service, response, timestamp }, index) => {
+    txt += `Entry #${index + 1}\n`;
+    txt += `Message:   ${currentData.message}\n`;
+    txt += `Service:   ${service}\n`;
+    txt += `Timestamp: ${timestamp}\n`;
+    txt += `Response:\n${response.replace(/\r?\n/g, '\n')}\n`; // preserve line breaks
+    txt += `\n----------------------------------------\n\n`; // separator between entries
+  });
+
+  const blob = new Blob([txt], { type: "text/plain" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "responses.txt";
+  link.click();
+};
+
     const serviceCheckboxes = () =>
       document.querySelectorAll("input[name='aiServices']");
 
@@ -172,5 +196,6 @@
       serviceCheckboxes().forEach(cb => cb.checked = false);
     });
   </script>
+
 </body>
 </html>
