@@ -36,7 +36,16 @@
   <div class="container">
     <h1 class="my-4">Chat AI Compiler</h1>
     <p>Select AI services, type a question, and get responses.</p>
-
+    <table class="table table-bordered" style="height: 100px; width: auto">
+      <thead>
+        <tr>
+          <th>AI Leaderboard</th>
+          <th>Running Score</th>
+        </tr>
+      </thead>
+      <tbody id="table-">
+      </tbody>
+    </table>
     <form id="chatForm" class="mb-4">
       <div class="form-group">
         <label>Select AI Services:</label>
@@ -127,7 +136,7 @@
 
           const div = document.createElement("div");
           div.className = "response";
-          div.innerHTML = `<h5>${svc}</h5><p>${reply}</p>`;
+          div.innerHTML = `<h5>${svc}<button class="btn btn-primary" onclick="increment()">Rate Me</button></h5><p>${reply}</p>`;
           responsesDiv.appendChild(div);
         } catch (err) {
           console.error(`Error from ${svc}:`, err);
@@ -171,6 +180,38 @@
     document.getElementById("deselectAll").addEventListener("click", () => {
       serviceCheckboxes().forEach(cb => cb.checked = false);
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+    const AI_data = [
+      { name: "compound-beta-mini", rating: 0 },
+      { name: "meta-llama_llama-4-maverick-17b-128e-instruct", rating: 0 },
+      { name: "qwen-qwq-32b", rating: 0 },
+      { name: "llama3-8b-8192", rating: 0 },
+      { name: "gemma2-9b-it", rating: 0 },
+      { name: "deepseek-r1-distill-llama-70b", rating: 0 },
+      { name: "llama3-70b-8192", rating: 0 },
+      { name: "mistral-saba-24b", rating: 0 },
+      { name: "compound-beta", rating: 0 },
+      { name: "llama-3.1-8b-instant", rating: 0 },
+      { name: "llama-3.3-70b-versatile", rating: 0 },
+      { name: "meta-llama_llama-4-scout-17b-16e-instruct", rating: 0 }
+    ];
+    
+
+    // Reference the table body
+    const tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = '';
+
+    // Generate table rows dynamically
+    AI_data.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.rating}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  });
   </script>
 </body>
 </html>
