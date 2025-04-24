@@ -43,7 +43,7 @@
           <th>Running Score</th>
         </tr>
       </thead>
-      <tbody id="table-">
+      <tbody id="table-body">
       </tbody>
     </table>
     <form id="chatForm" class="mb-4">
@@ -86,6 +86,35 @@
   </div>
 
   <script>
+    document.getElementById("table-body").innerHTML = "";
+    const AI_data = [
+      { name: "compound-beta-mini", rating: 0 },
+      { name: "meta-llama_llama-4-maverick-17b-128e-instruct", rating: 0 },
+      { name: "qwen-qwq-32b", rating: 0 },
+      { name: "llama3-8b-8192", rating: 0 },
+      { name: "gemma2-9b-it", rating: 0 },
+      { name: "deepseek-r1-distill-llama-70b", rating: 0 },
+      { name: "llama3-70b-8192", rating: 0 },
+      { name: "mistral-saba-24b", rating: 0 },
+      { name: "compound-beta", rating: 0 },
+      { name: "llama-3.1-8b-instant", rating: 0 },
+      { name: "llama-3.3-70b-versatile", rating: 0 },
+      { name: "meta-llama_llama-4-scout-17b-16e-instruct", rating: 0 }
+    ];
+    
+  document.addEventListener("DOMContentLoaded", () => {
+    // Reference the table body
+    const table_Body = document.getElementById("table-body");
+    table_Body.innerHTML = '';
+
+    // Generate table rows dynamically
+    AI_data.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${item.name}</td><td>${item.rating}</td>`;
+      table_Body.appendChild(row);
+    });
+  });
+
     const modelEndpointMap = {
       "compound-beta-mini": "/api/chat/compound-beta-mini",
       "meta-llama_llama-4-maverick-17b-128e-instruct": "/api/chat/meta-llama_llama-4-maverick-17b-128e-instruct",
@@ -180,38 +209,7 @@
     document.getElementById("deselectAll").addEventListener("click", () => {
       serviceCheckboxes().forEach(cb => cb.checked = false);
     });
-
-    document.addEventListener("DOMContentLoaded", () => {
-    const AI_data = [
-      { name: "compound-beta-mini", rating: 0 },
-      { name: "meta-llama_llama-4-maverick-17b-128e-instruct", rating: 0 },
-      { name: "qwen-qwq-32b", rating: 0 },
-      { name: "llama3-8b-8192", rating: 0 },
-      { name: "gemma2-9b-it", rating: 0 },
-      { name: "deepseek-r1-distill-llama-70b", rating: 0 },
-      { name: "llama3-70b-8192", rating: 0 },
-      { name: "mistral-saba-24b", rating: 0 },
-      { name: "compound-beta", rating: 0 },
-      { name: "llama-3.1-8b-instant", rating: 0 },
-      { name: "llama-3.3-70b-versatile", rating: 0 },
-      { name: "meta-llama_llama-4-scout-17b-16e-instruct", rating: 0 }
-    ];
     
-
-    // Reference the table body
-    const tableBody = document.getElementById("table-body");
-    tableBody.innerHTML = '';
-
-    // Generate table rows dynamically
-    AI_data.forEach(item => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.rating}</td>
-      `;
-      tableBody.appendChild(row);
-    });
-  });
   </script>
 </body>
 </html>
