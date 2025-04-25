@@ -11,7 +11,7 @@ A multi-container application that combines:
 - mongoDB has just been setup, testing done, saves to db; testing steps below
 
    ```bash
-    docker exec -it mongo-db mongosh
+   docker exec -it mongo-db mongosh
    ```
 
    ```bash
@@ -135,6 +135,7 @@ A multi-container application that combines:
 2. Enter your message and click **Send**.
 3. View responses in grid or list layout.
 4. Export the conversation and responses to CSV at any time.
+5. Leaderboard (beta) - index.html contained
 
 ## Contributing
 
