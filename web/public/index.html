@@ -87,11 +87,37 @@
         <button id="gridView" class="btn btn-secondary">Grid View</button>
         <button id="listView" class="btn btn-secondary">List View</button>
         <button id="exportCSV" class="btn btn-secondary">Export to CSV</button>
+        <button id="exportTXT" class="btn btn-secondary">Export to TXT</button>
+        <button id="copyToClipboard" class="btn btn-secondary">Copy to Clipboard</button>
       </div>
       <div id="responses" class="grid-layout"></div>
     </div>
   </div>
 
+ <script>
+  window.onload = function () {
+    document.getElementById("copyToClipboard").onclick = () => {
+      if (!currentData.message || !currentData.responses.length) {
+        return alert("No data to copy.");
+      }
+
+      let txt = "";
+
+      currentData.responses.forEach(({ service, response, timestamp }, index) => {
+        txt += `Entry #${index + 1}\n`;
+        txt += `Message:   ${currentData.message}\n`;
+        txt += `Service:   ${service}\n`;
+        txt += `Timestamp: ${timestamp}\n`;
+        txt += `Response:\n${response.replace(/\r?\n/g, '\n')}\n`;
+        txt += `\n----------------------------------------\n\n`;
+      });
+
+      navigator.clipboard.writeText(txt)
+        .then(() => alert("Copied to clipboard!"))
+        .catch(() => alert("Failed to copy to clipboard."));
+    };
+  };
+</script>
   <script>
     document.getElementById("table-body").innerHTML = "";
     const AI_data = [
@@ -224,6 +250,29 @@
     }
   }
 
+   document.getElementById("exportTXT").onclick = () => {
+      if (!currentData.message || !currentData.responses.length) {
+      return alert("No data to export.");
+  }
+
+  let txt = "";
+
+  currentData.responses.forEach(({ service, response, timestamp }, index) => {
+    txt += `Entry #${index + 1}\n`;
+    txt += `Message:   ${currentData.message}\n`;
+    txt += `Service:   ${service}\n`;
+    txt += `Timestamp: ${timestamp}\n`;
+    txt += `Response:\n${response.replace(/\r?\n/g, '\n')}\n`; // preserve line breaks
+    txt += `\n----------------------------------------\n\n`; // separator between entries
+  });
+
+  const blob = new Blob([txt], { type: "text/plain" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "responses.txt";
+  link.click();
+};
+
     const serviceCheckboxes = () =>
       document.querySelectorAll("input[name='aiServices']");
 
@@ -235,5 +284,6 @@
     });
     
   </script>
+
 </body>
 </html>

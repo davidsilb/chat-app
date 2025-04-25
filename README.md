@@ -1,13 +1,34 @@
-# Chat AI Compiler container with public hosting by Cloudflared tunnel container
+# Chat AI Compiler container || Cloudflared tunnel container || mongoDB inside
 
 A multi-container application that combines:
 
 1. **Chat AI Compiler** – A frontend interface to query multiple AI model endpoints concurrently, view responses in grid/list layouts, and export results to CSV.
 2. **Cloudflared tunnel** – a tunnel to push http://0.0.0.0:3000 to public.
+3. **mongoDB** – a non-relational db to store stuff, using moongoose to interface with.
 
-## Known bugs & solutions
+## DEV_Log
+
+- mongoDB has just been setup, testing done, saves to db; testing steps below
+
+   ```bash
+    docker exec -it mongo-db mongosh
+   ```
+
+   ```bash
+   use chatai
+   ```
+
+   ```bash
+   show collections
+   ```
+
+   ```bash
+   db.chatsessions.find().pretty()
+   ```
 
 - ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
+
+- commands to clear up docker issues
 
    ```bash
    docker-compose down --volumes --remove-orphans
@@ -15,6 +36,18 @@ A multi-container application that combines:
 
    ```bash
    docker-compose build --no-cache
+   ```
+
+   ```bash
+   docker builder prune --all --force  # removes ALL build cache
+   ```
+
+   ```bash
+   docker volume prune --force         # removes unused volumes not currently attached to containers
+   ```
+
+   ```bash
+   docker image prune --all --force    # removes unused images (not just dangling)
    ```
 
 ## Features
@@ -43,6 +76,7 @@ A multi-container application that combines:
 
    ```ini
    GROQ_API_KEY=your_groq_api_key_here
+   MONGO_URI=mongodb://mongo:27017/chatai
    CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
    ```
 
@@ -50,6 +84,7 @@ A multi-container application that combines:
 
    ```cmd
    echo GROQ_API_KEY=your_groq_api_key_here > .env
+   MONGO_URI=mongodb://mongo:27017/chatai
    echo CLOUDFLARED_TOKEN=your_cloudflared_token_here >> .env # optional
    ```
 
@@ -57,6 +92,7 @@ A multi-container application that combines:
 
    ```bash
    echo "GROQ_API_KEY=your_groq_api_key_here" > .env
+   MONGO_URI=mongodb://mongo:27017/chatai >> .env
    echo "CLOUDFLARED_TOKEN=your_cloudflared_token_here" >> .env # optional
    ```
 
@@ -82,11 +118,15 @@ A multi-container application that combines:
 ├── README.md                     # HELLO WORLD =)
 ├── .gitignore                    # ignore the .env =)
 ├── .env                          # Environment variables (not committed)
+├── .env.example                  # Public template with empty keys
 └── web/
     ├── Dockerfile                # Docker build for frontend + backend
     ├── package.json              # Express server dependencies
-    ├── index.html                # Frontend UI for chat compiler
-    └── server.js                 # Express app defining `/api/chat/*` routes
+    ├── server.js                 # Express app defining `/api/chat/*` routes
+    ├── public/
+    │   └── index.html            # Frontend UI for chat compiler
+    └── mongo/
+        └── ChatSessions.js       # Separate to avoid issues in server.js
 ```
 
 ## Frontend Usage

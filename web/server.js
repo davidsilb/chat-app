@@ -1,9 +1,22 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
+
+import mongoose from "mongoose";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-dotenv.config();
+import ChatSession from "./mongo/ChatSession.js";
+import exportTxtRouter from "./routes/exportTxt.js";
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("Connected to MongoDB"))
+.catch(err => {
+  console.error("Failed to connect to MongoDB:", err);
+  process.exit(1);
+});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -12,9 +25,12 @@ console.log("....server.js loading…");
 
 app.get("/ping", (_req, res) => res.send("pong"));
 
-app.use(express.static(__dirname));
-
+app.use(express.static(path.join(__dirname, "public")));
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 app.use(express.json());
+app.use("/api", exportTxtRouter);
 
 const textModels = [
   { route: "compound-beta-mini", model: "compound-beta-mini" },
@@ -46,10 +62,15 @@ const textModels = [
 function groqHandler(modelName) {
   return async (req, res) => {
     const userMessage = req.body.message;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
     try {
       const result = await fetch(
         "https://api.groq.com/openai/v1/chat/completions",
         {
+          signal: controller.signal,
           method: "POST",
           headers: {
             Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
@@ -61,19 +82,56 @@ function groqHandler(modelName) {
           })
         }
       );
-      const json = await result.json();
-      console.log(`[${modelName}] reply →`, json.choices?.[0]?.message?.content);
-      const content = json.choices?.[0]?.message?.content;
-      if (!content) {
-        return res.status(500).json({ reply: `No response from ${modelName}` });
+      clearTimeout(timeout);
+      if (!result.ok) {
+        console.error(`[${modelName}] non-200 response:`, result.status, await result.text());
+        return res.status(500).json({ reply: `Upstream error from ${modelName}` });
       }
+
+      const json = await result.json();
+      const content = json.choices?.[0]?.message?.content;
+
+      if (!content) {
+        console.error(`[${modelName}] bad response:`, JSON.stringify(json, null, 2));
+        return res.status(500).json({ reply: `No valid response from ${modelName}` });
+      }
+
+      console.log(`[${modelName}] reply →`, content);
+
+      // Save the chat to MongoDB
+      await ChatSession.create({
+        userId: req.body.userId || "tempUser",
+        prompt: userMessage,
+        responses: [{
+          model: modelName,
+          content,
+        }]
+      });
+
+      // Send the successful response
       res.json({ reply: content });
+
     } catch (err) {
+      if (err.name === 'AbortError') {
+        console.error(`[${modelName}] timeout error:`, err);
+        return res.status(504).json({ reply: `${modelName} timed out` });
+      }
       console.error(`[${modelName}] error:`, err);
       res.status(500).json({ reply: `Error calling ${modelName}` });
     }
   };
 }
+
+//for future use possibly, unused as of now
+app.get("/api/history/:userId", async (req, res) => {
+  try {
+    const chats = await ChatSession.find({ userId: req.params.userId });
+    res.json(chats);
+  } catch (err) {
+    console.error("Error fetching history:", err);
+    res.status(500).json({ error: "Failed to fetch history" });
+  }
+});
 
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))
