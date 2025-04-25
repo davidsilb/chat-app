@@ -30,13 +30,29 @@
     .services-list label {
       display: block;
     }
+    .scrollable-table {
+    max-height: 100px; /* Set the desired height for the scrollable area */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid #ddd; /* Optional: Add a border around the scrollable area */
+  }
   </style>
 </head>
 <body>
   <div class="container">
     <h1 class="my-4">Chat AI Compiler</h1>
     <p>Select AI services, type a question, and get responses.</p>
-
+    <div class="scrollable-table">
+    <table class="table table-bordered" style="height: 100px; width: auto">
+      <thead>
+        <tr>
+          <th>AI Leaderboard</th>
+          <th>Running Score</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+    </div>
     <form id="chatForm" class="mb-4">
       <div class="form-group">
         <label>Select AI Services:</label>
@@ -103,6 +119,35 @@
   };
 </script>
   <script>
+    document.getElementById("table-body").innerHTML = "";
+    const AI_data = [
+      { name: "compound-beta-mini", rating: 0 },
+      { name: "meta-llama_llama-4-maverick-17b-128e-instruct", rating: 0 },
+      { name: "qwen-qwq-32b", rating: 0 },
+      { name: "llama3-8b-8192", rating: 0 },
+      { name: "gemma2-9b-it", rating: 0 },
+      { name: "deepseek-r1-distill-llama-70b", rating: 0 },
+      { name: "llama3-70b-8192", rating: 0 },
+      { name: "mistral-saba-24b", rating: 0 },
+      { name: "compound-beta", rating: 0 },
+      { name: "llama-3.1-8b-instant", rating: 0 },
+      { name: "llama-3.3-70b-versatile", rating: 0 },
+      { name: "meta-llama_llama-4-scout-17b-16e-instruct", rating: 0 }
+    ];
+    
+  document.addEventListener("DOMContentLoaded", () => {
+    // Reference the table body
+    const table_Body = document.getElementById("table-body");
+    table_Body.innerHTML = '';
+
+    // Generate table rows dynamically
+    AI_data.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${item.name}</td><td>${item.rating}</td>`;
+      table_Body.appendChild(row);
+    });
+  });
+
     const modelEndpointMap = {
       "compound-beta-mini": "/api/chat/compound-beta-mini",
       "meta-llama_llama-4-maverick-17b-128e-instruct": "/api/chat/meta-llama_llama-4-maverick-17b-128e-instruct",
@@ -153,7 +198,7 @@
 
           const div = document.createElement("div");
           div.className = "response";
-          div.innerHTML = `<h5>${svc}</h5><p>${reply}</p>`;
+          div.innerHTML = `<h5>${svc}<button class="btn btn-primary ms-3" onclick="increment('${svc}')">Rate Me</button></h5><p>${reply}</p>`;
           responsesDiv.appendChild(div);
         } catch (err) {
           console.error(`Error from ${svc}:`, err);
@@ -187,6 +232,23 @@
       link.download = "responses.csv";
       link.click();
     };
+  function increment(svc) {
+  // Find the AI_data entry for the given svc
+    const aiEntry = AI_data.find(item => item.name === svc);
+    if (aiEntry) {
+      aiEntry.rating += 1; // Increment the rating
+      console.log(`${svc} rating incremented to ${aiEntry.rating}`);
+      // Update the leaderboard dynamically
+    const tableRow = Array.from(document.querySelectorAll("#table-body tr"))
+      .find(row => row.firstChild.textContent === svc);
+    if (tableRow) {
+      tableRow.lastChild.textContent = aiEntry.rating; // Update the rating cell
+    }
+    } 
+    else {
+      console.error(`Service "${svc}" not found in AI_data.`);
+    }
+  }
 
    document.getElementById("exportTXT").onclick = () => {
       if (!currentData.message || !currentData.responses.length) {
@@ -220,6 +282,7 @@
     document.getElementById("deselectAll").addEventListener("click", () => {
       serviceCheckboxes().forEach(cb => cb.checked = false);
     });
+    
   </script>
 
 </body>
