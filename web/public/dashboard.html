@@ -16,6 +16,8 @@
     </div>
   
     <h2>Your Chat History</h2>
+    <button id="downloadHistory" class="btn btn-success" style="margin-bottom: 20px;">Download Chat History</button>
+    <button id="printHistory" class="btn btn-info" style="margin-left: 10px; margin-bottom: 20px;">Print Chat History</button>
     <p id="username"></p>
     <div id="chat-history"></div>
 
@@ -82,6 +84,89 @@
         document.getElementById('username').innerText = 'Error loading user';
       });
   </script>
+  <script>
+    // Download entire chat history
+    document.getElementById('downloadHistory').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/history');
+        const data = await res.json();
+  
+        if (!data.length) {
+          return alert('No chat history to download.');
+        }
+  
+        let txt = '';
+        data.forEach((chat, chatIndex) => {
+          txt += `Chat #${chatIndex + 1}\n`;
+          txt += `Prompt: ${chat.prompt}\n`;
+  
+          if (chat.responses && chat.responses.length > 0) {
+            chat.responses.forEach((r, responseIndex) => {
+              txt += `\nResponse ${responseIndex + 1}\n`;
+              txt += `Model: ${r.model}\n`;
+              txt += `Content: ${r.content}\n`;
+              txt += `Timestamp: ${new Date(r.timestamp).toLocaleString()}\n`;
+            });
+          }
+  
+          txt += `\n----------------------------------------\n\n`;
+        });
+  
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'chat-history.txt';
+        link.click();
+      } catch (err) {
+        console.error('Error downloading history:', err);
+        alert('Failed to download chat history.');
+      }
+    });
+  </script>
+  <script>
+    // Print entire chat history
+    document.getElementById('printHistory').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/history');
+        const data = await res.json();
+  
+        if (!data.length) {
+          return alert('No chat history to print.');
+        }
+  
+        let printWindow = window.open('', '', 'height=800,width=600');
+        printWindow.document.write('<html><head><title>Chat History</title></head><body>');
+        printWindow.document.write('<h1>Chat History</h1>');
+  
+        data.forEach((chat, chatIndex) => {
+          printWindow.document.write(`<h3>Chat #${chatIndex + 1}</h3>`);
+          printWindow.document.write(`<strong>Prompt:</strong> ${chat.prompt}<br/>`);
+  
+          if (chat.responses && chat.responses.length > 0) {
+            chat.responses.forEach((r, responseIndex) => {
+              printWindow.document.write(`
+                <div style="margin-top:10px; padding-left:10px; border-left:2px solid #888;">
+                  <strong>Response ${responseIndex + 1}:</strong><br/>
+                  <em>Model:</em> ${r.model}<br/>
+                  <em>Content:</em> ${r.content}<br/>
+                  <em>Timestamp:</em> ${new Date(r.timestamp).toLocaleString()}<br/>
+                </div>
+              `);
+            });
+          }
+  
+          printWindow.document.write(`<hr/>`);
+        });
+  
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+      } catch (err) {
+        console.error('Error printing history:', err);
+        alert('Failed to load chat history for printing.');
+      }
+    });
+  </script>    
   
   
 </body>
