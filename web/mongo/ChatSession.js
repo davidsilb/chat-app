@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+const { Schema, Types } = mongoose;
 
-const chatSchema = new mongoose.Schema({
-  userId: String,
+const chatSchema = new Schema({
+  userId: { type: Types.ObjectId, ref: 'User' },
   prompt: String,
   responses: [{
     model: String,
@@ -12,7 +13,6 @@ const chatSchema = new mongoose.Schema({
 });
 
 chatSchema.index({ userId: 1 });
-chatSchema.index({ "messages.timestamp": -1 });
 
 const ChatSession = mongoose.model("ChatSession", chatSchema);
 export default ChatSession;

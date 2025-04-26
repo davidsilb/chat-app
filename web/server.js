@@ -31,7 +31,7 @@ app.get("/ping", (_req, res) => res.send("pong"));
 
 // Session middleware || + optional session cookie option for security
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'yourSecretKeyHere',
+  secret: process.env.SESSION_SECRET || 'yourSecretKeyHere', //remove or in production
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
@@ -118,7 +118,7 @@ function groqHandler(modelName) {
 
       // Save the chat to MongoDB
       await ChatSession.create({
-        userId: req.session.userId || "guest",
+        userId: req.session.userId || "Guest",
         prompt: userMessage,
         responses: [{
           model: modelName,
@@ -195,16 +195,34 @@ app.get('/api/whoami', (req, res) => {
   }
 });
 
-//for future use possibly, unused as of now
-app.get("/api/history/:userId", async (req, res) => {
+app.get('/api/whoaminame', async (req, res) => {
+  if (!req.session.userId) {
+    return res.json({ loggedIn: false });
+  }
+
   try {
-    const chats = await ChatSession.find({ userId: req.params.userId });
-    res.json(chats);
+    const user = await User.findById(req.session.userId).select('username');
+    if (!user) {
+      return res.json({ loggedIn: false });
+    }
+
+    res.json({ loggedIn: true, username: user.username });
   } catch (err) {
-    console.error("Error fetching history:", err);
-    res.status(500).json({ error: "Failed to fetch history" });
+    console.error('Error in /api/whoaminame:', err);
+    res.status(500).json({ loggedIn: false, error: 'Server error' });
   }
 });
+
+// get history of chats for thhe user that is logged in
+app.get('/api/history', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Not logged in' });
+  }
+
+  const chats = await ChatSession.find({ userId: req.session.userId }).sort({ createdAt: -1 });
+  res.json(chats);
+});
+
 
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))

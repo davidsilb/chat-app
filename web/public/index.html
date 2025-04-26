@@ -89,6 +89,8 @@
 <body>
   <div class="container">
     <h1 class="my-4">Chat AI Compiler</h1>
+    <p id="username"></p>
+    <div id="auth-buttons" style="margin-bottom: 20px;"></div>
     <p>Select AI services, type a question, and get responses.</p>
     <!-- Toggle Button -->
     <div id="toggleArrow">
@@ -349,6 +351,58 @@
     const icon = document.getElementById('toggleIcon');
     icon.innerHTML = panel.classList.contains('open') ? '&#9654;' : '&#9664;';
     });
-  </script> 
+  </script>
+<script>
+  fetch('/api/whoaminame')
+    .then(res => res.json())
+    .then(data => {
+      const usernameElement = document.getElementById('username');
+      const authButtons = document.getElementById('auth-buttons');
+      authButtons.innerHTML = ''; // clear old buttons
+      
+      if (data.loggedIn) {
+        usernameElement.innerText = 'Logged in as: ' + (data.username || 'Guest');
+        
+        // Create History Button
+        const historyBtn = document.createElement('button');
+        historyBtn.className = 'btn btn-success mr-2';
+        historyBtn.innerText = 'View History';
+        historyBtn.onclick = () => {
+          window.location.href = '/dashboard.html';
+        };
+
+        // Create Logout Button
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'btn btn-danger';
+        logoutBtn.innerText = 'Logout';
+        logoutBtn.onclick = () => {
+          // Logout and refresh
+          fetch('/logout', { method: 'POST' })
+            .then(() => window.location.reload())
+            .catch(err => console.error('Logout error', err));
+        };
+
+        authButtons.appendChild(historyBtn);
+        authButtons.appendChild(logoutBtn);
+
+      } else {
+        usernameElement.innerText = 'Not logged in';
+        
+        // Create Login Button
+        const loginBtn = document.createElement('button');
+        loginBtn.className = 'btn btn-primary';
+        loginBtn.innerText = 'Login';
+        loginBtn.onclick = () => {
+          window.location.href = '/login.html';
+        };
+
+        authButtons.appendChild(loginBtn);
+      }
+    })
+    .catch(err => {
+      console.error('Failed to fetch user info:', err);
+      document.getElementById('username').innerText = 'Error loading user';
+    });
+</script> 
 </body>
 </html>

@@ -5,9 +5,84 @@
   <title>Dashboard</title>
 </head>
 <body>
-  <h1>Welcome to Your Dashboard!</h1>
-  <form action="/logout" method="POST">
-    <button type="submit">Logout</button>
-  </form>
+    <h1>Welcome to Your Dashboard!</h1>
+  
+    <div style="margin-bottom: 20px;">
+      <button onclick="window.location.href='/'" class="btn btn-primary" style="margin-right: 10px;">Home</button>
+      
+      <form action="/logout" method="POST" style="display: inline;">
+        <button type="submit" class="btn btn-danger">Logout</button>
+      </form>
+    </div>
+  
+    <h2>Your Chat History</h2>
+    <p id="username"></p>
+    <div id="chat-history"></div>
+
+  <script>
+    async function showChats(data) {
+      const container = document.getElementById('chat-history');
+      container.innerHTML = '';
+  
+      if (!data.length) {
+        container.innerHTML = '<p>No chat history yet.</p>';
+        return;
+      }
+  
+      data.forEach(chat => {
+        const div = document.createElement('div');
+        div.style.border = "1px solid #ccc";
+        div.style.padding = "10px";
+        div.style.marginBottom = "10px";
+  
+        let responsesHtml = '';
+  
+        if (chat.responses && chat.responses.length > 0) {
+          chat.responses.forEach((r, index) => {
+            responsesHtml += `
+              <div style="margin-top: 10px; padding-left: 10px; border-left: 2px solid #888;">
+                <strong>Response ${index + 1}:</strong><br/>
+                <em>Model:</em> ${r.model}<br/>
+                <em>Content:</em> ${r.content}<br/>
+                <em>Timestamp:</em> ${new Date(r.timestamp).toLocaleString()}
+              </div>
+            `;
+          });
+        }
+  
+        div.innerHTML = `
+          <strong>Prompt:</strong> ${chat.prompt}<br/>
+          ${responsesHtml}
+        `;
+        container.appendChild(div);
+      });
+    }
+  
+    fetch('/api/history')
+      .then(res => res.json())
+      .then(data => showChats(data))
+      .catch(err => {
+        document.getElementById('chat-history').innerHTML = 'Error loading history.';
+        console.error('History error:', err);
+      });
+  </script>
+  <script>
+    // Show logged-in username
+    fetch('/api/whoaminame')
+      .then(res => res.json())
+      .then(data => {
+        if (data.loggedIn) {
+          document.getElementById('username').innerText = 'Logged in as: ' + data.username;
+        } else {
+          document.getElementById('username').innerText = 'Not logged in';
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch user info:', err);
+        document.getElementById('username').innerText = 'Error loading user';
+      });
+  </script>
+  
+  
 </body>
 </html>
