@@ -1,4 +1,8 @@
 import express from "express";
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import bcrypt from 'bcryptjs';
+import { User } from './models/User.js'
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -25,11 +29,25 @@ console.log("....server.js loading…");
 
 app.get("/ping", (_req, res) => res.send("pong"));
 
+// Session middleware || + optional session cookie option for security
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'yourSecretKeyHere',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 60 * 24  // 1 day
+  }
+}));
+
 app.use(express.static(path.join(__dirname, "public")));
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // to handle form submits
 app.use("/api", exportTxtRouter);
 
 const textModels = [
@@ -64,7 +82,7 @@ function groqHandler(modelName) {
     const userMessage = req.body.message;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeout = setTimeout(() => controller.abort(), 9000); // 9s timeout
 
     try {
       const result = await fetch(
@@ -100,13 +118,13 @@ function groqHandler(modelName) {
 
       // Save the chat to MongoDB
       await ChatSession.create({
-        userId: req.body.userId || "tempUser",
+        userId: req.session.userId || "guest",
         prompt: userMessage,
         responses: [{
           model: modelName,
           content,
         }]
-      });
+      });      
 
       // Send the successful response
       res.json({ reply: content });
@@ -121,6 +139,61 @@ function groqHandler(modelName) {
     }
   };
 }
+
+// --------- AUTH ROUTES ---------
+
+// Register
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = new User({ username, password: hashedPassword });
+    await user.save();
+    res.redirect('/login.html');
+  } catch (err) {
+    res.status(400).send('Registration error: ' + err.message);
+  }
+});
+
+// Login
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+  if (!user) return res.status(400).send('User not found.');
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(400).send('Invalid password.');
+
+  req.session.userId = user._id;
+  res.redirect('/dashboard.html');
+});
+
+// Logout
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login.html');
+  });
+});
+
+// Middleware to protect routes
+function isAuthenticated(req, res, next) {
+  if (req.session.userId) return next();
+  res.redirect('/login.html');
+}
+
+// Example: protect dashboard.html
+app.get('/dashboard.html', isAuthenticated, (req, res, next) => {
+  next(); // Let it serve static file if authenticated
+});
+
+// so frontend can check to see who is logged in
+app.get('/api/whoami', (req, res) => {
+  if (req.session.userId) {
+    res.json({ loggedIn: true, userId: req.session.userId });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
 
 //for future use possibly, unused as of now
 app.get("/api/history/:userId", async (req, res) => {
