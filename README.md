@@ -104,26 +104,29 @@ A multi-container application that combines:
 
 ```bash
 .
-├── docker-compose.yml            # Multi-container setup (frontend + backend + MongoDB)
-├── README.md                     # Project overview and instructions
-├── .gitignore                    # Ignore node_modules, .env, etc.
-├── .env                          # Private environment variables (not committed)
-├── .env.example                  # Public template showing required env vars
+├── docker-compose.yml             # Docker Compose setup (app + MongoDB)
+├── README.md                      # Project overview and instructions
+├── .gitignore                     # Ignore .env
+├── .env                           # YOU MAKE (not committed)
+├── .env.example                   # Public template for .env setup
 └── web/
-    ├── Dockerfile                # Docker build file for the web server
-    ├── package.json              # Express server dependencies
-    ├── server.js                 # Main Express app (routes, auth, API handlers)
+    ├── Dockerfile                 # Dockerfile to build the web server
+    ├── package.json               # Express server dependencies
+    ├── server.js                  # Main Express app (routes, auth, API handlers)
     ├── public/
-    │   ├── index.html            # Frontend UI (chat app dashboard)
-    │   └── dashboard.html        # Protected dashboard after login
-    ├── models/
-    │   └── User.js               # Mongoose User model (auth users)
+    │   ├── dashboard.html         # Dashboard page (protected)
+    │   ├── index.html             # Main chat compiler UI using oldGroq.js
+    │   ├── index2.html            # Alternate test page using batchGroq.js
+    │   ├── login.html             # Login page
+    │   └── register.html          # Register page
     ├── mongo/
-    │   └── ChatSession.js        # Mongoose ChatSession model (store chats)
+    │   └── ChatSession.js         # Mongoose schema (store chats)
+    ├── models/
+    │   └── User.js                # Mongoose schema for users (auth)
     └── routes/
-        ├── batchGroqHandler.js   # Batch multiple AI models at once
-        ├── exportTxt.js          # Export chat history as downloadable text
-        └── oldGroqHandler.js     # Handles single/multi Groq model chat completion
+        ├── batchGroqHandler.js    # NEW Handle batch requests across models
+        ├── exportTxt.js           # Export chat history as .txt
+        └── oldGroqHandler.js      # OLD Handle single model chat completions
 ```
 
 ## Frontend Usage
