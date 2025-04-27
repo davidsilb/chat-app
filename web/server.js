@@ -1,4 +1,8 @@
 import express from "express";
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import bcrypt from 'bcryptjs';
+import { User } from './models/User.js'
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -8,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import ChatSession from "./mongo/ChatSession.js";
 import exportTxtRouter from "./routes/exportTxt.js";
+import { batchGroqHandler } from './routes/batchGroqHandler.js';
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -23,13 +28,33 @@ const app = express();
 
 console.log("....server.js loading…");
 
+// Fail early if no SESSION_SECRET in production
+if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error("SESSION_SECRET must be set in production!");
+}
+
+
 app.get("/ping", (_req, res) => res.send("pong"));
+
+// Session middleware || + optional session cookie option for security
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 60 * 24  // 1 day
+  }
+}));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // to handle form submits
 app.use("/api", exportTxtRouter);
 
 const textModels = [
@@ -64,7 +89,7 @@ function groqHandler(modelName) {
     const userMessage = req.body.message;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeout = setTimeout(() => controller.abort(), 9000); // 9s timeout
 
     try {
       const result = await fetch(
@@ -82,7 +107,9 @@ function groqHandler(modelName) {
           })
         }
       );
+
       clearTimeout(timeout);
+
       if (!result.ok) {
         console.error(`[${modelName}] non-200 response:`, result.status, await result.text());
         return res.status(500).json({ reply: `Upstream error from ${modelName}` });
@@ -98,9 +125,13 @@ function groqHandler(modelName) {
 
       console.log(`[${modelName}] reply →`, content);
 
-      // Save the chat to MongoDB
+      // 👇 FIX userId here
+      const finalUserId = req.session.userId
+        ? new mongoose.Types.ObjectId(req.session.userId)
+        : new mongoose.Types.ObjectId('000000000000000000000000'); // special guest ObjectId
+
       await ChatSession.create({
-        userId: req.body.userId || "tempUser",
+        userId: finalUserId,
         prompt: userMessage,
         responses: [{
           model: modelName,
@@ -108,7 +139,6 @@ function groqHandler(modelName) {
         }]
       });
 
-      // Send the successful response
       res.json({ reply: content });
 
     } catch (err) {
@@ -122,20 +152,120 @@ function groqHandler(modelName) {
   };
 }
 
-//for future use possibly, unused as of now
-app.get("/api/history/:userId", async (req, res) => {
+// --------- AUTH ROUTES ---------
+
+// Register
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
   try {
-    const chats = await ChatSession.find({ userId: req.params.userId });
-    res.json(chats);
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = new User({ username, password: hashedPassword });
+    await user.save();
+    res.redirect('/login.html');
   } catch (err) {
-    console.error("Error fetching history:", err);
-    res.status(500).json({ error: "Failed to fetch history" });
+    res.status(400).send('Registration error: ' + err.message);
   }
 });
+
+// Login
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+  if (!user) return res.status(400).send('User not found.');
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(400).send('Invalid password.');
+
+  req.session.userId = user._id;
+  res.redirect('/dashboard.html');
+});
+
+// Logout
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login.html');
+  });
+});
+
+// Middleware to protect routes
+function isAuthenticated(req, res, next) {
+  if (req.session.userId) return next();
+  res.redirect('/login.html');
+}
+
+// Example: protect dashboard.html
+app.get('/dashboard.html', isAuthenticated, (req, res, next) => {
+  next(); // Let it serve static file if authenticated
+});
+
+// so frontend can check to see who is logged in
+app.get('/api/whoami', (req, res) => {
+  if (req.session.userId) {
+    res.json({ loggedIn: true, userId: req.session.userId });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+app.get('/api/whoaminame', async (req, res) => {
+  if (!req.session.userId) {
+    return res.json({ loggedIn: false });
+  }
+
+  try {
+    const user = await User.findById(req.session.userId).select('username');
+    if (!user) {
+      return res.json({ loggedIn: false });
+    }
+
+    res.json({ loggedIn: true, username: user.username });
+  } catch (err) {
+    console.error('Error in /api/whoaminame:', err);
+    res.status(500).json({ loggedIn: false, error: 'Server error' });
+  }
+});
+
+// get history of chats for thhe user that is logged in
+app.get('/api/history', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Not logged in' });
+  }
+
+  try {
+    const chats = await ChatSession.find({
+      userId: new mongoose.Types.ObjectId(req.session.userId)
+    }).sort({ createdAt: -1 });
+
+    res.json(chats);
+  } catch (err) {
+    console.error('Error fetching chat history:', err);
+    res.status(500).json({ error: 'Server error fetching history' });
+  }
+});
+
 
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))
 );
+
+app.post('/api/batch-chat', async (req, res) => {
+  try {
+    const { message, role, models } = req.body;
+    const userId = req.session.userId || "Guest";
+
+    const savedChats = await batchGroqHandler({
+      models,
+      userMessage: message,
+      userRole: role || "user",
+      userId
+    });
+
+    res.json({ success: true, chats: savedChats });
+  } catch (err) {
+    console.error("Batch chat error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, "0.0.0.0", () =>

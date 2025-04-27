@@ -26,6 +26,10 @@ A multi-container application that combines:
    db.chatsessions.find().pretty()
    ```
 
+   ```bash
+   db.users.find().pretty()
+   ```
+
 - ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
 
 - commands to clear up docker issues
@@ -61,6 +65,7 @@ A multi-container application that combines:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) (including Docker Compose)
 - A Groq API key (set in `.env` as `GROQ_API_KEY`)
+- SESSION_SECRET='anything-in-here' (set in `.env`)
 - (Optional) A Cloudflare Tunnel token (set in `.env` as `CLOUDFLARED_TOKEN`)
 
 ## Getting Started
@@ -77,6 +82,7 @@ A multi-container application that combines:
    ```ini
    GROQ_API_KEY=your_groq_api_key_here
    MONGO_URI=mongodb://mongo:27017/chatai
+   SESSION_SECRET=anything_in_here
    CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
    ```
 

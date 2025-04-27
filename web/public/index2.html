@@ -153,6 +153,7 @@
   </div>
 
  <script>
+let currentData = { message: '', responses: [] };
   window.onload = function () {
     document.getElementById("copyToClipboard").onclick = () => {
       if (!currentData.message || !currentData.responses.length) {
@@ -206,23 +207,6 @@
     });
   });
 
-    const modelEndpointMap = {
-      "compound-beta-mini": "/api/chat/compound-beta-mini",
-      "meta-llama_llama-4-maverick-17b-128e-instruct": "/api/chat/meta-llama_llama-4-maverick-17b-128e-instruct",
-      "qwen-qwq-32b": "/api/chat/qwen-qwq-32b",
-      "llama3-8b-8192": "/api/chat/llama3-8b-8192",
-      "gemma2-9b-it": "/api/chat/gemma2-9b-it",
-      "deepseek-r1-distill-llama-70b": "/api/chat/deepseek-r1-distill-llama-70b",
-      "llama3-70b-8192": "/api/chat/llama3-70b-8192",
-      "mistral-saba-24b": "/api/chat/mistral-saba-24b",
-      "compound-beta": "/api/chat/compound-beta",
-      "llama-3.1-8b-instant": "/api/chat/llama-3.1-8b-instant",
-      "llama-3.3-70b-versatile": "/api/chat/llama-3.3-70b-versatile",
-      "meta-llama_llama-4-scout-17b-16e-instruct": "/api/chat/meta-llama_llama-4-scout-17b-16e-instruct"
-    };
-
-    let currentData = { message: '', responses: [] };
-
     document.getElementById("chatForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const message = document.getElementById("msg").value.trim();
@@ -236,36 +220,44 @@
       responsesDiv.innerHTML = "";
       currentData = { message, responses: [] };
 
-      // verify every service has an endpoint
-      for (let svc of selected) {
-        if (!modelEndpointMap[svc]) {
-          return alert(`No endpoint defined for "${svc}".`);
-        }
-      }
-
-      await Promise.all(selected.map(async svc => {
-        try {
-          const res = await fetch(modelEndpointMap[svc], {
+      try {
+        const res = await fetch("/api/batch-chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
-          });
-          const { reply = "No reply received." } = await res.json();
+            body: JSON.stringify({
+            message,
+            role: "user", // or allow choosing "system", "user", etc later
+            models: selected
+            })
+        });
 
-          currentData.responses.push({ service: svc, response: reply, timestamp: new Date().toISOString() });
+        const data = await res.json();
 
-          const div = document.createElement("div");
-          div.className = "response";
-          div.innerHTML = `<h5>${svc}<button class="btn btn-primary ms-3" onclick="increment('${svc}')">Rate Me</button></h5><p>${reply}</p>`;
-          responsesDiv.appendChild(div);
-        } catch (err) {
-          console.error(`Error from ${svc}:`, err);
-          const errDiv = document.createElement("div");
-          errDiv.className = "response";
-          errDiv.innerHTML = `<h5>${svc}</h5><p style="color:red;">Error: ${err.message}</p>`;
-          responsesDiv.appendChild(errDiv);
+        if (!data.success || !data.chats) {
+            throw new Error(data.error || "Unknown error");
         }
-      }));
+
+        // Populate responses
+        data.chats.forEach(chat => {
+            const { responses } = chat;
+            responses.forEach(({ model, content }) => {
+            currentData.responses.push({
+                service: model,
+                response: content,
+                timestamp: new Date().toISOString()
+            });
+
+            const div = document.createElement("div");
+            div.className = "response";
+            div.innerHTML = `<h5>${model}<button class="btn btn-primary ms-3" onclick="increment('${model}')">Rate Me</button></h5><p>${content}</p>`;
+            document.getElementById("responses").appendChild(div);
+            });
+        });
+
+        } catch (err) {
+        console.error("Batch chat error:", err);
+        alert("Error sending batch chat: " + err.message);
+        }
     });
 
     document.getElementById("gridView").onclick = () => {
