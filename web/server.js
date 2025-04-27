@@ -36,7 +36,7 @@ if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'production') {
 
 app.get("/ping", (_req, res) => res.send("pong"));
 
-// Session middleware || + optional session cookie option for security
+// Session middleware || + session cookie REQUIRED security
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -84,8 +84,6 @@ const textModels = [
   }
 ];
 
-// --------- AUTH ROUTES ---------
-
 // Register
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -125,7 +123,7 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login.html');
 }
 
-// Example: protect dashboard.html
+// protect dashboard.html
 app.get('/dashboard.html', isAuthenticated, (req, res, next) => {
   next(); // Let it serve static file if authenticated
 });
@@ -139,6 +137,7 @@ app.get('/api/whoami', (req, res) => {
   }
 });
 
+// so frontend can see name of user logging in
 app.get('/api/whoaminame', async (req, res) => {
   if (!req.session.userId) {
     return res.json({ loggedIn: false });
@@ -157,7 +156,7 @@ app.get('/api/whoaminame', async (req, res) => {
   }
 });
 
-// get history of chats for thhe user that is logged in
+// get history of chats for the user that is logged in
 app.get('/api/history', async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not logged in' });
@@ -175,11 +174,12 @@ app.get('/api/history', async (req, res) => {
   }
 });
 
-
+// legacy code for oldGroqHandler
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))
 );
 
+// code for the batchGroqHandler
 app.post('/api/batch-chat', async (req, res) => {
   try {
     const { message, role, models } = req.body;
@@ -198,6 +198,8 @@ app.post('/api/batch-chat', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// --------- CORE RUN & CLOSE ---------
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, "0.0.0.0", () =>

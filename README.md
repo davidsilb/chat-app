@@ -86,22 +86,6 @@ A multi-container application that combines:
    CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
    ```
 
-   **Using CMD (Windows):**
-
-   ```cmd
-   echo GROQ_API_KEY=your_groq_api_key_here > .env
-   MONGO_URI=mongodb://mongo:27017/chatai
-   echo CLOUDFLARED_TOKEN=your_cloudflared_token_here >> .env # optional
-   ```
-
-   **Using Bash (Linux):**
-
-   ```bash
-   echo "GROQ_API_KEY=your_groq_api_key_here" > .env
-   MONGO_URI=mongodb://mongo:27017/chatai >> .env
-   echo "CLOUDFLARED_TOKEN=your_cloudflared_token_here" >> .env # optional
-   ```
-
 3. **Build and run all services**
 
    ```bash
@@ -120,19 +104,26 @@ A multi-container application that combines:
 
 ```bash
 .
-├── docker-compose.yml            # Multi-container setup
-├── README.md                     # HELLO WORLD =)
-├── .gitignore                    # ignore the .env =)
-├── .env                          # Environment variables (not committed)
-├── .env.example                  # Public template with empty keys
+├── docker-compose.yml            # Multi-container setup (frontend + backend + MongoDB)
+├── README.md                     # Project overview and instructions
+├── .gitignore                    # Ignore node_modules, .env, etc.
+├── .env                          # Private environment variables (not committed)
+├── .env.example                  # Public template showing required env vars
 └── web/
-    ├── Dockerfile                # Docker build for frontend + backend
+    ├── Dockerfile                # Docker build file for the web server
     ├── package.json              # Express server dependencies
-    ├── server.js                 # Express app defining `/api/chat/*` routes
+    ├── server.js                 # Main Express app (routes, auth, API handlers)
     ├── public/
-    │   └── index.html            # Frontend UI for chat compiler
-    └── mongo/
-        └── ChatSessions.js       # Separate to avoid issues in server.js
+    │   ├── index.html            # Frontend UI (chat app dashboard)
+    │   └── dashboard.html        # Protected dashboard after login
+    ├── models/
+    │   └── User.js               # Mongoose User model (auth users)
+    ├── mongo/
+    │   └── ChatSession.js        # Mongoose ChatSession model (store chats)
+    └── routes/
+        ├── batchGroqHandler.js   # Batch multiple AI models at once
+        ├── exportTxt.js          # Export chat history as downloadable text
+        └── oldGroqHandler.js     # Handles single/multi Groq model chat completion
 ```
 
 ## Frontend Usage
