@@ -11,9 +11,13 @@ export async function batchGroqHandler({
   if (!models.length) throw new Error("No models provided.");
   if (!userMessage.trim()) throw new Error("Empty user message.");
 
-  const finalUserId = userId
-    ? new mongoose.Types.ObjectId(userId)
-    : new mongoose.Types.ObjectId('000000000000000000000000');
+  let finalUserId;
+
+  try {
+    finalUserId = new mongoose.Types.ObjectId(userId);
+  } catch (e) {
+    finalUserId = new mongoose.Types.ObjectId('000000000000000000000000'); // fallback dummy user
+  }  
 
   const results = await Promise.allSettled(
     models.map((modelName) => singleGroqCall({ modelName, userMessage, userRole }))

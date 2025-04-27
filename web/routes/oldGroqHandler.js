@@ -41,7 +41,7 @@ export function groqHandler(modelName) {
         return res.status(500).json({ reply: `No valid response from ${modelName}` });
       }
 
-      console.log(`[${modelName}] reply →`, content);
+      console.log(`[${modelName}] got reply`);
 
       const finalUserId = req.session.userId
         ? new mongoose.Types.ObjectId(req.session.userId)
