@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 import ChatSession from "./mongo/ChatSession.js";
 import exportTxtRouter from "./routes/exportTxt.js";
 import { batchGroqHandler } from './routes/batchGroqHandler.js';
-import { groqHandler } from './routes/oldGroqHandler.js';
+import { groqHandler } from './routes/groqHandler.js';
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true

@@ -2,12 +2,27 @@ import mongoose from "mongoose";
 import fetch from "node-fetch";
 import ChatSession from "../mongo/ChatSession.js";
 
+function cleanContent(text) {
+    if (!text) return '';
+  
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1')      // Remove **bold**
+      .replace(/\\\((.*?)\\\)/g, '$1')       // Remove \( ... \)
+      .replace(/\\\[.*?\\\]/gs, '')          // Remove \[ ... \]
+      .replace(/\\boxed\{(.*?)\}/g, '$1')    // Remove \boxed{...}
+      .replace(/```.*?```/gs, '')            // Remove code blocks
+      .replace(/`(.*?)`/g, '$1')             // Remove inline backticks
+      .replace(/\\times/g, '×')              // Replace \times with ×
+      .replace(/\s+/g, ' ')                  // Collapse extra spaces
+      .trim();
+  }
+
 export function groqHandler(modelName) {
   return async (req, res) => {
     const userMessage = req.body.message;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 9000); // 9s timeout
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
       const result = await fetch(
@@ -47,23 +62,25 @@ export function groqHandler(modelName) {
         ? new mongoose.Types.ObjectId(req.session.userId)
         : new mongoose.Types.ObjectId('000000000000000000000000'); // guest id
 
-      await ChatSession.create({
-        userId: finalUserId,
-        prompt: userMessage,
-        responses: [{
-          model: modelName,
-          content,
-        }]
-      });
+        const cleanedContent = cleanContent(content);
 
-      res.json({ reply: content });
+        await ChatSession.create({
+          userId: finalUserId,
+          prompt: userMessage,
+          responses: [{
+            model: modelName,
+            content: cleanedContent,
+          }]
+        });
+
+        res.json({ reply: cleanedContent });
 
     } catch (err) {
       if (err.name === 'AbortError') {
         console.error(`[${modelName}] timeout error:`, err);
         return res.status(504).json({ reply: `${modelName} timed out` });
       }
-      console.error(`[${modelName}] error:`, err);
+      console.error(`[${modelName}] error:`, err.stack || err);
       res.status(500).json({ reply: `Error calling ${modelName}` });
     }
   };
