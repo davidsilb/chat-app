@@ -12,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import ChatSession from "./mongo/ChatSession.js";
 import exportTxtRouter from "./routes/exportTxt.js";
+import { batchGroqHandler } from './routes/batchGroqHandler.js';
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -27,11 +28,17 @@ const app = express();
 
 console.log("....server.js loading…");
 
+// Fail early if no SESSION_SECRET in production
+if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error("SESSION_SECRET must be set in production!");
+}
+
+
 app.get("/ping", (_req, res) => res.send("pong"));
 
 // Session middleware || + optional session cookie option for security
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'yourSecretKeyHere', //remove or in production
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
@@ -100,7 +107,9 @@ function groqHandler(modelName) {
           })
         }
       );
+
       clearTimeout(timeout);
+
       if (!result.ok) {
         console.error(`[${modelName}] non-200 response:`, result.status, await result.text());
         return res.status(500).json({ reply: `Upstream error from ${modelName}` });
@@ -116,17 +125,20 @@ function groqHandler(modelName) {
 
       console.log(`[${modelName}] reply →`, content);
 
-      // Save the chat to MongoDB
+      // 👇 FIX userId here
+      const finalUserId = req.session.userId
+        ? new mongoose.Types.ObjectId(req.session.userId)
+        : new mongoose.Types.ObjectId('000000000000000000000000'); // special guest ObjectId
+
       await ChatSession.create({
-        userId: req.session.userId || "Guest",
+        userId: finalUserId,
         prompt: userMessage,
         responses: [{
           model: modelName,
           content,
         }]
-      });      
+      });
 
-      // Send the successful response
       res.json({ reply: content });
 
     } catch (err) {
@@ -219,14 +231,41 @@ app.get('/api/history', async (req, res) => {
     return res.status(401).json({ error: 'Not logged in' });
   }
 
-  const chats = await ChatSession.find({ userId: req.session.userId }).sort({ createdAt: -1 });
-  res.json(chats);
+  try {
+    const chats = await ChatSession.find({
+      userId: new mongoose.Types.ObjectId(req.session.userId)
+    }).sort({ createdAt: -1 });
+
+    res.json(chats);
+  } catch (err) {
+    console.error('Error fetching chat history:', err);
+    res.status(500).json({ error: 'Server error fetching history' });
+  }
 });
 
 
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))
 );
+
+app.post('/api/batch-chat', async (req, res) => {
+  try {
+    const { message, role, models } = req.body;
+    const userId = req.session.userId || "Guest";
+
+    const savedChats = await batchGroqHandler({
+      models,
+      userMessage: message,
+      userRole: role || "user",
+      userId
+    });
+
+    res.json({ success: true, chats: savedChats });
+  } catch (err) {
+    console.error("Batch chat error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, "0.0.0.0", () =>
