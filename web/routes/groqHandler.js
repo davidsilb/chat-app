@@ -2,27 +2,13 @@ import mongoose from "mongoose";
 import fetch from "node-fetch";
 import ChatSession from "../mongo/ChatSession.js";
 
-function cleanContent(text) {
-    if (!text) return '';
-  
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')      // Remove **bold**
-      .replace(/\\\((.*?)\\\)/g, '$1')       // Remove \( ... \)
-      .replace(/\\\[.*?\\\]/gs, '')          // Remove \[ ... \]
-      .replace(/\\boxed\{(.*?)\}/g, '$1')    // Remove \boxed{...}
-      .replace(/```.*?```/gs, '')            // Remove code blocks
-      .replace(/`(.*?)`/g, '$1')             // Remove inline backticks
-      .replace(/\\times/g, '×')              // Replace \times with ×
-      .replace(/\s+/g, ' ')                  // Collapse extra spaces
-      .trim();
-  }
 
 export function groqHandler(modelName) {
   return async (req, res) => {
     const userMessage = req.body.message;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const timeout = setTimeout(() => controller.abort(), 7000);
 
     try {
       const result = await fetch(
@@ -62,18 +48,16 @@ export function groqHandler(modelName) {
         ? new mongoose.Types.ObjectId(req.session.userId)
         : new mongoose.Types.ObjectId('000000000000000000000000'); // guest id
 
-        const cleanedContent = cleanContent(content);
-
         await ChatSession.create({
           userId: finalUserId,
           prompt: userMessage,
           responses: [{
             model: modelName,
-            content: cleanedContent,
+            content: content,
           }]
         });
 
-        res.json({ reply: cleanedContent });
+        res.json({ reply: content });
 
     } catch (err) {
       if (err.name === 'AbortError') {

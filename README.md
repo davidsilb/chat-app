@@ -124,9 +124,9 @@ A multi-container application that combines:
     ├── models/
     │   └── User.js                # Mongoose schema for users (auth)
     └── routes/
-        ├── batchGroqHandler.js    # NEW Handle batch requests across models
+        ├── batchGroqHandler.js    # Handle batch requests across models
         ├── exportTxt.js           # Export chat history as .txt
-        └── oldGroqHandler.js      # OLD Handle single model chat completions
+        └── groqHandler.js      # Handle single model chat completions
 ```
 
 ## Frontend Usage
