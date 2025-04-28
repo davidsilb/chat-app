@@ -8,7 +8,7 @@ export function groqHandler(modelName) {
     const userMessage = req.body.message;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 7000);
+    const timeout = setTimeout(() => controller.abort(), 9000);
 
     try {
       const result = await fetch(
@@ -44,9 +44,15 @@ export function groqHandler(modelName) {
 
       console.log(`[${modelName}] got reply`);
 
-      const finalUserId = req.session.userId
-        ? new mongoose.Types.ObjectId(req.session.userId)
-        : new mongoose.Types.ObjectId('000000000000000000000000'); // guest id
+      let finalUserId;
+      try {
+        finalUserId = req.session.userId
+          ? new mongoose.Types.ObjectId(req.session.userId)
+          : new mongoose.Types.ObjectId('000000000000000000000000');
+      } catch (e) {
+        console.error(`caught error after let finalUserId - [${modelName}] invalid userId, using guest id:`, e.stack || e.message || e);
+        finalUserId = new mongoose.Types.ObjectId('000000000000000000000000');
+      }
 
         await ChatSession.create({
           userId: finalUserId,
@@ -61,10 +67,11 @@ export function groqHandler(modelName) {
 
     } catch (err) {
       if (err.name === 'AbortError') {
-        console.error(`[${modelName}] timeout error:`, err);
+        console.error(`[${modelName}] timeout error:`, err.stack || err.message || err);
         return res.status(504).json({ reply: `${modelName} timed out` });
       }
-      console.error(`[${modelName}] error:`, err.stack || err);
+    
+      console.error(`[${modelName}] error:`, err.stack || err.message || err);
       res.status(500).json({ reply: `Error calling ${modelName}` });
     }
   };
