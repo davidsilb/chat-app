@@ -3,7 +3,7 @@
 A multi-container application that combines:
 
 1. **Chat AI Compiler** – A frontend interface to query multiple AI model endpoints concurrently, view responses in grid/list layouts, and export results to CSV.
-2. **Cloudflared tunnel** – a tunnel to push http://0.0.0.0:3000 to public.
+2. **Cloudflared tunnel** – a tunnel to push <http://0.0.0.0:3000> to public.
 3. **mongoDB** – a non-relational db to store stuff, using moongoose to interface with.
 
 ## DEV_Log
@@ -116,7 +116,6 @@ A multi-container application that combines:
     ├── public/
     │   ├── dashboard.html         # Dashboard page (protected)
     │   ├── index.html             # Main chat compiler UI using oldGroq.js
-    │   ├── index2.html            # Alternate test page using batchGroq.js
     │   ├── login.html             # Login page
     │   └── register.html          # Register page
     ├── mongo/
@@ -124,9 +123,9 @@ A multi-container application that combines:
     ├── models/
     │   └── User.js                # Mongoose schema for users (auth)
     └── routes/
-        ├── batchGroqHandler.js    # Handle batch requests across models
+        ├── addTagToResponse.js    # tag msgs func, implemented in index
         ├── exportTxt.js           # Export chat history as .txt
-        └── groqHandler.js      # Handle single model chat completions
+        └── groqHandler.js         # Handle single model chat completions
 ```
 
 ## Frontend Usage
