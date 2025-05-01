@@ -54,7 +54,7 @@ export function groqHandler(modelName) {
         finalUserId = new mongoose.Types.ObjectId('000000000000000000000000');
       }
 
-        await ChatSession.create({
+        const saved = await ChatSession.create({
           userId: finalUserId,
           prompt: userMessage,
           responses: [{
@@ -63,7 +63,7 @@ export function groqHandler(modelName) {
           }]
         });
 
-        res.json({ reply: content });
+        res.json({ reply: content, chatSessionId: saved._id });
 
     } catch (err) {
       if (err.name === 'AbortError') {

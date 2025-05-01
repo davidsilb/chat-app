@@ -250,13 +250,19 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message })
           });
-          const { reply = "No reply received." } = await res.json();
+          const { reply = "No reply received.", chatSessionId } = await res.json();
+          const currentChatSessionId = chatSessionId;
 
           currentData.responses.push({ service: svc, response: reply, timestamp: new Date().toISOString() });
 
           const div = document.createElement("div");
           div.className = "response";
-          div.innerHTML = `<h5>${svc}<button class="btn btn-primary ms-3" onclick="increment('${svc}')">Rate Me</button></h5><p>${reply}</p>`;
+          div.innerHTML = `
+                          <h5>${svc}
+                            <button class="btn btn-primary ms-3" onclick="increment('${svc}')">Rate Me</button>
+                            <button class="btn btn-sm btn-info" onclick="openTagEditor('${svc}', '${chatSessionId}', \`${reply.replace(/`/g, "\\`")}\`)">+ Tag</button>
+                          </h5>
+                          <p>${reply}</p>`;
           responsesDiv.appendChild(div);
         } catch (err) {
           console.error(`Error from ${svc}:`, err);
@@ -341,6 +347,28 @@
       serviceCheckboxes().forEach(cb => cb.checked = false);
     });
     
+  </script>
+<script>
+  function openTagEditor(model, chatId, content) {
+    const tag = prompt(`Add a tag for ${model}:`);
+    if (!tag) return;
+  
+    fetch("/api/addTagToResponse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatSessionId: chatId,
+        model,
+        content,
+        tag
+      })
+    })
+    .then(res => {
+      if (res.ok) alert("Tag added!");
+      else alert("Failed to add tag.");
+    })
+    .catch(err => alert("Error tagging: " + err));
+  }
   </script>
   <script>
     const panel = document.getElementById('leaderboardPanel');

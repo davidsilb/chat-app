@@ -25,6 +25,11 @@ mongoose.connect(process.env.MONGO_URI, {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "exports")));
+import addTagToResponse from './routes/addTagToResponse.js';
+app.use('/api/addTagToResponse', addTagToResponse);
 
 console.log("....server.js loading…");
 
@@ -49,11 +54,9 @@ app.use(session({
   }
 }));
 
-app.use(express.static(path.join(__dirname, "public")));
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // to handle form submits
 app.use("/api", exportTxtRouter);
 
@@ -192,7 +195,7 @@ app.post('/api/batch-chat', async (req, res) => {
       userId
     });
 
-    res.json({ success: true, chats: savedChats });
+    res.json({ success: true, chatSessionId: savedChats._id, chats: savedChats.responses });
   } catch (err) {
     console.error("Batch chat error:", err);
     res.status(500).json({ success: false, error: err.message });
