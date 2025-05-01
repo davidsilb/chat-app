@@ -4,25 +4,27 @@ import ChatSession from '../mongo/ChatSession.js';
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-    console.log('Received tag request body:', req.body);
-    const { chatSessionId, model, content, tag } = req.body;
-
-  const result = await ChatSession.updateOne(
-    {
-      _id: chatSessionId,
-      'responses.model': model,
-      'responses.content': content
-    },
-    {
-      $addToSet: { 'responses.$.tags': tag }
+    try {
+      console.log('Received tag request body:', req.body);
+      const { chatSessionId, responseId, tag } = req.body;
+  
+      const session = await ChatSession.findById(chatSessionId);
+      if (!session) return res.status(404).send("Session not found");
+  
+      const response = session.responses.id(responseId);
+      if (!response) return res.status(404).send("Response not found");
+  
+      response.tags = response.tags || [];
+      if (!response.tags.includes(tag)) {
+        response.tags.push(tag);
+      }
+  
+      await session.save();
+      res.sendStatus(200);
+    } catch (err) {
+      console.error("Error tagging response:", err);
+      res.status(500).send("Failed to save tag.");
     }
-  );
-
-  if (result.modifiedCount > 0) {
-    res.sendStatus(200);
-  } else {
-    res.status(404).send("Tag not added (response not found).");
-  }
-});
+  });
 
 export default router;

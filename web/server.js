@@ -11,7 +11,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import ChatSession from "./mongo/ChatSession.js";
 import exportTxtRouter from "./routes/exportTxt.js";
-import { batchGroqHandler } from './routes/batchGroqHandler.js';
 import { groqHandler } from './routes/groqHandler.js';
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -177,30 +176,10 @@ app.get('/api/history', async (req, res) => {
   }
 });
 
-// legacy code for oldGroqHandler
+// main code for grogHandler
 textModels.forEach(({ route, model }) =>
   app.post(`/api/chat/${route}`, groqHandler(model))
 );
-
-// code for the batchGroqHandler
-app.post('/api/batch-chat', async (req, res) => {
-  try {
-    const { message, role, models } = req.body;
-    const userId = req.session.userId || "Guest";
-
-    const savedChats = await batchGroqHandler({
-      models,
-      userMessage: message,
-      userRole: role || "user",
-      userId
-    });
-
-    res.json({ success: true, chatSessionId: savedChats._id, chats: savedChats.responses });
-  } catch (err) {
-    console.error("Batch chat error:", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 // --------- CORE RUN & CLOSE ---------
 
