@@ -124,9 +124,10 @@ A multi-container application that combines:
     ├── models/
     │   └── User.js                # Mongoose schema for users (auth)
     └── routes/
+        ├── addTagToResponse.js    # tag msgs func, implemented in index
         ├── batchGroqHandler.js    # Handle batch requests across models
         ├── exportTxt.js           # Export chat history as .txt
-        └── groqHandler.js      # Handle single model chat completions
+        └── groqHandler.js         # Handle single model chat completions
 ```
 
 ## Frontend Usage
