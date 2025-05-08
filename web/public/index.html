@@ -89,9 +89,19 @@
     color: #6c757d;
     font-style: italic;
     }
+    body.logo {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh; /* Ensures the body is at least the full viewport height */
+    background-image: url('./logos/whitelogo2.jpg'); /* Path to the 1920x1080 image */
+    background-size: cover; /* Scales the image to cover the entire window */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed; /* Optional: Keeps the background fixed while scrolling */
+    }
   </style>
 </head>
-<body>
+<body class="logo">
   <div class="container">
     <h1 class="my-4">Chat AI Compiler</h1>
     <p id="username"></p>
@@ -102,7 +112,6 @@
       <span id="toggleText">Leaderboard</span>
       <span id="toggleIcon">&#9664;</span>
     </div>
-
     <!-- Slide-Out Leaderboard Panel -->
     <div id="leaderboardPanel">
       <table class="table table-bordered">
@@ -119,9 +128,6 @@
     <form id="chatForm" class="mb-4">
       <div class="form-group">
         <label>Select AI Services:</label>
-        <label>Best model for coding: deepseek-r1-distill-llama-70b</label>
-        <label>Best model for reasoning: mistral-saba-24b</label>
-        <label>Best model for general purpose: llama3-70b-8192</label>
         <div class="mb-2">
           <button id="selectAll" type="button" class="btn btn-sm btn-outline-primary">Select All</button>
           <button id="deselectAll" type="button" class="btn btn-sm btn-outline-secondary">Deselect All</button>
