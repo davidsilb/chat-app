@@ -6,6 +6,9 @@
   <title>Chat AI Compiler</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box; /*magic_code*/
+    }
     #responses.grid-layout {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -22,6 +25,8 @@
       font-size: 12px;
     }
     .services-list {
+      text-align: left;
+      display: block;
       max-height: 200px;
       overflow-y: scroll;
       border: 1px solid #ddd;
@@ -31,9 +36,9 @@
       display: block;
     }
     .scrollable-table {
-    max-height: 100px; /* Set the desired height for the scrollable area */
-    overflow-y: auto; /* Enable vertical scrolling */
-    border: 1px solid #ddd; /* Optional: Add a border around the scrollable area */
+    max-height: 100px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
     }
       #leaderboardPanel {
       position: fixed;
@@ -49,11 +54,9 @@
       z-index: 1000;
       padding: 10px;
     }
-
     #leaderboardPanel.open {
       right: 0;
     }
-
     #toggleArrow {
     position: fixed;
     top: 90px;
@@ -87,27 +90,78 @@
     .use-case {
     font-size: 0.8rem;
     color: #6c757d;
-    font-style: italic;
     }
-    body.logo {
     .logo {
-    font-size: 24px;               /* Font size for the logo */
-    font-weight: bold;            /* Makes the text bold */
-    color: #FFFFFF;               /* White text color */
-    background-color: #555555;    /* Blue background */
-    padding: 10px 20px;           /* Space around the text */
-    border-radius: 8px;           /* Rounded corners */
-    position: fixed;              /* Fixed in top-left corner */
-    top: 10px;
-    left: 10px;
-    z-index: 1000;                /* On top of other elements */
-    font-family: Arial, sans-serif;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background-color: #555;
+      padding: 6px 14px;
+      border-radius: 8px;
+      z-index: 999; /* Less than the toggleTheme button */
+      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+      font-family: Arial, sans-serif, system-ui;
+    }
+    .logo-img {
+      height: 24px;
+      width: auto;
+      margin-left: -14px; /* new line to fix gap */
+      width: auto;
+      vertical-align: middle;
+    }
+    .container {
+      margin-top: 80px; /* Adjust based on the logo height */
+    }
+        body.light-mode {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    body.dark-mode .container {
+      background-color: #1e1e1e;
+      border-color: #444;
+    }
+    body.dark-mode .logo,
+    .logo {
+      background-color: #333333;
+      color: #ffffff;
+    }
+    body.dark-mode .services-list {
+      background-color: #222;
+      border-color: #555;
+    }
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background-color: #2a2a2a;
+      color: #ffffff;
+      border: 1px solid #555;
+    }
+    body.dark-mode .btn-primary {
+      background-color: #0d6efd;
+      border-color: #0a58ca;
+    }
+    body.dark-mode .btn-secondary {
+      background-color: #6c757d;
+      border-color: #565e64;
+    }
+    #toggleTheme {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 2000;
     }
   </style>
 </head>
-<body class="logo">
-  <div class="logo">ChatAIComp</div>
+<body class="light-mode">
+  <button id="toggleTheme" class="btn btn-secondary">Toggle Dark Mode</button>
+  <div class="logo"><img src=".\logos\cute_logo.png" alt="Logo" class="logo-img">ChatAIComp</div>
   <div class="container">
 
     <p id="username"></p>
@@ -452,6 +506,20 @@ function openTagEditor(model, chatId, responseId) {
       console.error('Failed to fetch user info:', err);
       document.getElementById('username').innerText = 'Error loading user';
     });
-</script> 
+</script>
+  <script>
+    const themeToggleBtn = document.getElementById("toggleTheme");
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.body.classList.add(savedTheme + "-mode");
+
+    themeToggleBtn.addEventListener("click", () => {
+      const currentTheme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+      document.body.classList.remove(currentTheme + "-mode");
+      document.body.classList.add(newTheme + "-mode");
+      localStorage.setItem("theme", newTheme);
+    });
+  </script>
 </body>
 </html>
