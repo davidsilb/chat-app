@@ -115,6 +115,16 @@
     .container {
       margin-top: 80px; /* Adjust based on the logo height */
     }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh; /* Ensures the body is at least the full viewport height */
+      background-image: url('./logos/whitelogo2.jpg'); /* Path to the 1920x1080 image */
+      background-size: cover; /* Scales the image to cover the entire window */
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+    }
         body.light-mode {
       background-color: #ffffff;
       color: #000000;
@@ -157,9 +167,16 @@
       right: 10px;
       z-index: 2000;
     }
+    #resetTheme {
+      position: fixed;
+      top: 10px;
+      right: 180px;
+      z-index: 2000;
+    }
   </style>
 </head>
 <body class="light-mode">
+  <button id="resetTheme" class="btn btn-secondary">Reset Layout</button>
   <button id="toggleTheme" class="btn btn-secondary">Toggle Dark Mode</button>
   <div class="logo"><img src=".\logos\cute_logo.png" alt="Logo" class="logo-img">ChatAIComp</div>
   <div class="container">
@@ -520,6 +537,15 @@ function openTagEditor(model, chatId, responseId) {
       document.body.classList.add(newTheme + "-mode");
       localStorage.setItem("theme", newTheme);
     });
+    function resetTheme() {
+    document.body.style.backgroundImage = "url('/logos/whitelogo.jpg')"; // Clear background image on body
+    document.querySelectorAll('.content').forEach(el => {
+      el.style.backgroundImage = 'none'; // Clear background image on .content elements
+    });
+    }
+    // Attach resetStyles to the resetTheme button
+    document.getElementById('resetTheme').addEventListener('click', resetTheme);
+    
   </script>
 </body>
 </html>
