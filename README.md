@@ -60,25 +60,25 @@ A multi-container application that combines:
 
 - ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
 
-- 1commands to clear up docker issues
+- 1.commands to clear up docker issues
 
    ```bash
    docker-compose down --volumes --remove-orphans
    ```
 
-- 2removes ALL build cache
+- 2.removes ALL build cache
 
    ```bash
    docker builder prune --all --force
    ```
 
-- 3removes unused volumes not currently attached to containers
+- 3.removes unused volumes not currently attached to containers
 
    ```bash
    docker volume prune --force
    ```
 
-- 4removes unused images (not just dangling)
+- 4.removes unused images (not just dangling)
 
    ```bash
    docker image prune --all --force
@@ -94,9 +94,9 @@ A multi-container application that combines:
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) (including Docker Compose)
-- A Groq API key (set in `.env` as `GROQ_API_KEY`)
-- SESSION_SECRET='anything-in-here' (set in `.env`)
-- (Optional) A Cloudflare Tunnel token (set in `.env` as `CLOUDFLARED_TOKEN`)
+- A [Groq API key](https://console.groq.com/keys) (set in `.env` as `GROQ_API_KEY`)
+- SESSION_SECRET='a-password-you-set-for-privacy/encryption' (set in `.env`)
+- (Optional, not needed) A Cloudflare Tunnel token (set in `.env` as `CLOUDFLARED_TOKEN`)
 
 ## Getting Started
 
@@ -110,10 +110,9 @@ A multi-container application that combines:
 2. **Create your `.env` file**
 
    ```ini
-   GROQ_API_KEY=your_groq_api_key_here
    MONGO_URI=mongodb://mongo:27017/chatai
    SESSION_SECRET=anything_in_here
-   CLOUDFLARED_TOKEN=your_cloudflared_token_here  # optional
+   GROQ_API_KEY=your_groq_api_key_here
    ```
 
 3. **Build and run all services**
@@ -136,36 +135,37 @@ A multi-container application that combines:
 .
 ├── docker-compose.yml             # Docker Compose setup (app+MongoDB+cloudF)
 ├── docker-compose.dev.yml         # Docker Compose dev wrapper (app+MongoDB+bb)
-├── README.md                      # Project overview and instructions
+├── README.md                      # YOU ARE HERE
 ├── .gitignore                     # Ignore .env
 ├── .env                           # YOU MAKE (not committed)
-├── .env.example                   # Public template for .env setup
+├── .env.example                   # A template for your personal .env setup
 └── web/
-    ├── Dockerfile                 # Dockerfile to build the web server
+    ├── Dockerfile                 # Dockerfile that will build the webapp
     ├── package.json               # Express server dependencies
-    ├── server.js                  # Main Express app (routes, auth, API handlers)
+    ├── server.js                  # Express app main file
     ├── public/
-    │   ├── dashboard.html         # Dashboard page (protected)
-    │   ├── index.html             # Main chat compiler UI using oldGroq.js
+    │   ├── dashboard.html         # Dashboard page (semi-protected)
+    │   ├── index.html             # Main chat compiler UI using groqHandler.js
     │   ├── login.html             # Login page
     │   ├── register.html          # Register page
     │   └── logos/                 # a plagua in this product, full of slop
     │       ├── cute_logo.png      #🐱the only file that should be in here🐱
     │       ├── asdlkj;fhgglk;jhdsfag;hlkjn # this slop makes me cry 
     │       ├── afdgdagaklj;adfgl;kjgfd;lkjaf # :'(
+    │
     ├── middleware/
     │   └── isAuthenticated.js     # Check for who is login, knock knock
     ├── mongo/
     │   └── ChatSession.js         # Mongoose schema (store chats)
+    ├── protected/
+    │   └── searchpage.html        # Search for stuff, if logged in
     ├── models/
     │   └── User.js                # Mongoose schema for users (auth)
     └── routes/
-        ├── addTagToResponse.js    # tag msgs func, implemented in index
-        ├── exportTxt.js           # Export chat history as .txt
-        ├── groqHandler.js         # Handle single model chat completions
+        ├── addTagToResponse.js    # tag msgs func, implemented in index.html
+        ├── exportTxt.js           # Export chat history as .txt files
+        ├── groqHandler.js         # Handle groq
         └── searchFuntion.js       # They said it could not be done
-                                   # they laughed at me
-                                   # WHO"S LAUGHING NOW!!!!
 ```
 
 ## Frontend Usage
@@ -174,29 +174,7 @@ A multi-container application that combines:
 2. Enter your message and click **Send**.
 3. View responses in grid or list layout.
 4. Export the conversation and responses to CSV at any time.
-5. Leaderboard (beta) - index.html contained
-
-## Contributing
-
-1. Fork the repo and create your branch:
-
-   ```bash
-   git checkout -b feature/XYZ
-   ```
-
-2. Commit your changes:
-
-   ```bash
-   git commit -m "Add XYZ feature"
-   ```
-
-3. Push to your branch:
-
-   ```bash
-   git push origin feature/XYZ
-   ```
-
-4. Open a Pull Request.
+5. Leaderboard (beta, unfinished) - index.html contained, session contained
 
 ## License
 
