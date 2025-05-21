@@ -12,15 +12,15 @@ import { fileURLToPath } from "url";
 import ChatSession from "./mongo/ChatSession.js";
 import exportTxtRouter from "./routes/exportTxt.js";
 import { groqHandler } from './routes/groqHandler.js';
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("Connected to MongoDB"))
-.catch(err => {
+try {
+  const conn = await mongoose.connect(process.env.MONGO_URI);
+  console.log("Print1 (bad logic here, so-> undefined) Connected to MongoDB:", conn.readyState);
+  console.log("Print2 (good=1) Connected to MongoDB:", conn.connection.readyState);
+  console.log("Print3 (good=1) Connected to MongoDB:", mongoose.connection.readyState);
+} catch (err) {
   console.error("Failed to connect to MongoDB:", err);
   process.exit(1);
-});
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();

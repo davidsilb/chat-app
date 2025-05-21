@@ -15,11 +15,7 @@ A multi-container application that combines:
    ```
 
 ~~- i am so f-ing done building cloudflared tunnel in dev work~~USE THIS?
-
-<pre><code class="language-bash">
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-</code></pre>
-</del>
+<pre><code class="language-bash">docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build</code></pre></del>
 
 - old way (production way)
 

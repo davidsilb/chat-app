@@ -10,5 +10,5 @@ services:
     restart: "no"
     depends_on: []
     profiles: []
-    entrypoint: ["sh", "-c", "echo Skipping tunnel in dev mode"]
+    entrypoint: ["sh", "-c", "echo 'Skipping tunnel in dev mode, busybox is holding down the fort :)'"]
     command: []
