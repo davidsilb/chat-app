@@ -8,6 +8,40 @@ A multi-container application that combines:
 
 ## DEV_Log
 
+- f me wtf is this??? 2hrs of vibeazz, and this garbage is useless, USE IT
+
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build --force-recreate
+   ```
+
+~~- i am so f-ing done building cloudflared tunnel in dev work~~USE THIS?
+
+<pre><code class="language-bash">
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+</code></pre>
+</del>
+
+- old way (production way)
+
+   ```bash
+   docker-compose up --build
+   ```
+
+- “Don’t start `cloudflared` until `web` passes its healthcheck.”
+
+   ```bash
+   cloudflared:
+   depends_on:
+    web:
+      condition: service_healthy
+   ```
+
+- “Don’t start `cloudflared` until `web` passes its healthcheck.”
+
+   ```bash
+   omg, so done/down
+   ```
+
 - mongoDB has just been setup, testing done, saves to db; testing steps below
 
    ```bash
@@ -42,16 +76,22 @@ A multi-container application that combines:
    docker-compose build --no-cache
    ```
 
-   ```bash
-   docker builder prune --all --force  # removes ALL build cache
-   ```
+- removes ALL build cache
 
    ```bash
-   docker volume prune --force         # removes unused volumes not currently attached to containers
+   docker builder prune --all --force
    ```
 
+- removes unused volumes not currently attached to containers
+
    ```bash
-   docker image prune --all --force    # removes unused images (not just dangling)
+   docker volume prune --force
+   ```
+
+- removes unused images (not just dangling)
+
+   ```bash
+   docker image prune --all --force
    ```
 
 ## Features
@@ -117,7 +157,11 @@ A multi-container application that combines:
     │   ├── dashboard.html         # Dashboard page (protected)
     │   ├── index.html             # Main chat compiler UI using oldGroq.js
     │   ├── login.html             # Login page
-    │   └── register.html          # Register page
+    │   ├── register.html          # Register page
+    │   └── logos/                 # a cancer in this product
+    │       ├── cute_logo.png      # the only file that should be in here
+    │       ├── asdlkj;fhgglk;jhdsfag;hlkjn #F### 
+    │       ├── afdgdagaklj;adfgl;kjgfd;lkjaf #F###
     ├── mongo/
     │   └── ChatSession.js         # Mongoose schema (store chats)
     ├── models/

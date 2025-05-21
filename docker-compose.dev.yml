@@ -1,0 +1,14 @@
+services:
+  web:
+    healthcheck:
+      disable: false
+    environment:
+      - NODE_ENV=development
+
+  cloudflared:
+    image: busybox
+    restart: "no"
+    depends_on: []
+    profiles: []
+    entrypoint: ["sh", "-c", "echo Skipping tunnel in dev mode"]
+    command: []

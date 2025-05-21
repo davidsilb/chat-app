@@ -1,5 +1,5 @@
 # Use the Debian slim base image
-FROM node:23-slim
+FROM node:24-slim
 
 # Install curl for healthchecks
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
@@ -13,7 +13,8 @@ WORKDIR /app
 
 # Install only production dependencies (skip devDeps)
 COPY package*.json ./
-RUN npm install --production
+ENV NODE_ENV=production
+RUN npm install
 
 # Copy the rest of your app
 COPY . .

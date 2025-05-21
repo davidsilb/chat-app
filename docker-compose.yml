@@ -33,6 +33,7 @@ services:
         condition: service_healthy
     command: tunnel --url http://web:3000
     restart: "no"
+    # profiles: ["tunnel"] # docker-compose --profile tunnel up --build
 volumes:
   mongo-data:
   mongo-config:
