@@ -3,19 +3,19 @@
 A multi-container application that combines:
 
 1. **Chat AI Compiler** – A frontend interface to query multiple AI model endpoints concurrently, view responses in grid/list layouts, and export results to CSV.
-2. **Cloudflared tunnel** – a tunnel to push <http://0.0.0.0:3000> to public.
+2. **Cloudflared tunnel** – a tunnel to push <http://0.0.0.0:3000> to public. (optional -> use dev mode to disable)
 3. **mongoDB** – a non-relational db to store stuff, using moongoose to interface with.
 
 ## DEV_Log
 
-- f me wtf is this??? 2hrs of vibeazz, and this garbage is useless, USE IT
+- build with this -> force dev mode ontop of release; busybox placeholder
 
    ```bash
-   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build --force-recreate
+   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
    ```
 
-~~- i am so f-ing done building cloudflared tunnel in dev work~~USE THIS?
-<pre><code class="language-bash">docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build</code></pre></del>
+~~-USE THHIS?~~ no one knows what this does, but it does do something
+<pre><code class="language-bash">docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build --force-recreate</code></pre></del>
 
 - old way (production way)
 
@@ -23,19 +23,17 @@ A multi-container application that combines:
    docker-compose up --build
    ```
 
-- “Don’t start `cloudflared` until `web` passes its healthcheck.”
+   ```bash
+   docker-compose up --build  --no-cache
+   ```
+
+- 4urINFO: “Don’t start `cloudflared` until `web` passes its healthcheck.”
 
    ```bash
    cloudflared:
    depends_on:
     web:
       condition: service_healthy
-   ```
-
-- “Don’t start `cloudflared` until `web` passes its healthcheck.”
-
-   ```bash
-   omg, so done/down
    ```
 
 - mongoDB has just been setup, testing done, saves to db; testing steps below
@@ -62,29 +60,25 @@ A multi-container application that combines:
 
 - ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
 
-- commands to clear up docker issues
+- 1commands to clear up docker issues
 
    ```bash
    docker-compose down --volumes --remove-orphans
    ```
 
-   ```bash
-   docker-compose build --no-cache
-   ```
-
-- removes ALL build cache
+- 2removes ALL build cache
 
    ```bash
    docker builder prune --all --force
    ```
 
-- removes unused volumes not currently attached to containers
+- 3removes unused volumes not currently attached to containers
 
    ```bash
    docker volume prune --force
    ```
 
-- removes unused images (not just dangling)
+- 4removes unused images (not just dangling)
 
    ```bash
    docker image prune --all --force
@@ -156,8 +150,8 @@ A multi-container application that combines:
     │   ├── register.html          # Register page
     │   └── logos/                 # a cancer in this product
     │       ├── cute_logo.png      # the only file that should be in here
-    │       ├── asdlkj;fhgglk;jhdsfag;hlkjn #F### 
-    │       ├── afdgdagaklj;adfgl;kjgfd;lkjaf #F###
+    │       ├── asdlkj;fhgglk;jhdsfag;hlkjn # this slop makes me cry 
+    │       ├── afdgdagaklj;adfgl;kjgfd;lkjaf # :'(
     ├── mongo/
     │   └── ChatSession.js         # Mongoose schema (store chats)
     ├── models/
