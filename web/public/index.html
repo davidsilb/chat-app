@@ -532,14 +532,19 @@ function openTagEditor(model, chatId, responseId) {
     themeToggleBtn.addEventListener("click", () => {
       const currentTheme = document.body.classList.contains("dark-mode") ? "dark" : "light";
       const newTheme = currentTheme === "dark" ? "light" : "dark";
-      document.body.style.backgroundImage = 'none';
+      if (newTheme === "dark") {
+        document.body.style.backgroundImage = 'none';
+      } else {
+        document.body.style.backgroundImage = 'url(./logos/whitelogo2.jpg)';
+      }
+      
 
       document.body.classList.remove(currentTheme + "-mode");
       document.body.classList.add(newTheme + "-mode");
       localStorage.setItem("theme", newTheme);
     });
     function resetTheme() {
-    document.body.style.backgroundImage = "url('/logos/whitelogo.jpg')"; // Clear background image on body
+    document.body.style.backgroundImage = 'none'; // Clear background image on body
       document.querySelectorAll('.content').forEach(el => {
       el.style.backgroundImage = 'none'; // Clear background image on .content elements
     });
