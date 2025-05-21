@@ -123,7 +123,7 @@ app.post('/logout', (req, res) => {
 import isAuthenticated from './middleware/isAuthenticated.js';
 // Protect searchpage.html from no login
 app.get('/searchpage.html', isAuthenticated, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'searchpage.html'));
+  res.sendFile(path.join(__dirname, 'protected', 'searchpage.html'));
 });
 // Middleware to search for words and the birds
 import searchRoutes from './routes/searchFunction.js';
