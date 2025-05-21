@@ -1,10 +1,10 @@
-# Chat AI Compiler container || Cloudflared tunnel container || mongoDB inside
+# Chat AI Compiler container || Cloudflare tunnel container || MongoDB inside
 
 A multi-container application that combines:
 
 1. **Chat AI Compiler** – A frontend interface to query multiple AI model endpoints concurrently, view responses in grid/list layouts, and export results to CSV.
-2. **Cloudflared tunnel** – a tunnel to push <http://0.0.0.0:3000> to public. (optional -> use dev mode to disable)
-3. **mongoDB** – a non-relational db to store stuff, using moongoose to interface with.
+2. **Cloudflare tunnel** – a tunnel to push <http://0.0.0.0:3000> to public. (optional -> use dev mode to disable)
+3. **MongoDB** – a non-relational db to store stuff, using moongoose to interface with.
 
 ## DEV_Log
 

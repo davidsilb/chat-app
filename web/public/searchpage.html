@@ -7,7 +7,17 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f0f0f0;
+      background: #f4f4f4;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .nav-buttons button {
+      margin-left: 10px;
+      padding: 6px 12px;
     }
     input[type="text"] {
       padding: 8px;
@@ -26,23 +36,29 @@
     }
     .prompt {
       font-weight: bold;
+      margin-bottom: 5px;
     }
     .response {
       margin-left: 10px;
     }
     #usernameDisplay {
-      margin-top: 10px;
       font-style: italic;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <h1>Search Your Chat History</h1>
+  <header>
+    <h1>Search Your Chat History</h1>
+    <div class="nav-buttons">
+      <button onclick="location.href='index.html'">🏠Home</button>
+      <button onclick="location.href='dashboard.html'">📋Dashboard</button>
+    </div>
+  </header>
 
-  <button onclick="checkUser()">Who is logged in?</button>
-  <div id="usernameDisplay"></div>
+  <div id="usernameDisplay">Checking login status...</div>
 
-  <br/><br/>
+  <br/>
 
   <input type="text" id="keyword" placeholder="Enter keyword..." />
   <button onclick="search()">Search</button>
@@ -50,63 +66,72 @@
   <div id="results"></div>
 
   <script>
-    async function checkUser() {
+    async function loadUser() {
       try {
         const res = await fetch('/api/whoaminame');
         const data = await res.json();
         const display = document.getElementById('usernameDisplay');
         if (data.loggedIn) {
-          display.textContent = `👤 Logged in as: ${data.username}`;
+          display.textContent = `Logged in as: ${data.username}`;
         } else {
-          display.textContent = "❌ Not logged in.";
+          display.textContent = "Not logged in.";
         }
       } catch (err) {
-        console.error('Error checking login:', err);
         document.getElementById('usernameDisplay').textContent = "Error checking login.";
+        console.error(err);
       }
     }
 
     async function search() {
-      const keyword = document.getElementById("keyword").value.trim();
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = '';
+    const keyword = document.getElementById("keyword").value.trim();
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = '';
 
-      if (!keyword) {
+    if (!keyword) {
         resultsDiv.innerHTML = "<p>Please enter a keyword.</p>";
         return;
-      }
+    }
 
-      try {
+    try {
         const response = await fetch(`/api/search?keyword=${encodeURIComponent(keyword)}`);
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+
+        // If not JSON (e.g. HTML page), throw
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Not authenticated or invalid response");
         }
 
         const data = await response.json();
 
         if (data.length === 0) {
-          resultsDiv.innerHTML = "<p>No results found.</p>";
-          return;
+        resultsDiv.innerHTML = "<p>No results found.</p>";
+        return;
         }
 
         data.forEach(chat => {
-          const chatDiv = document.createElement('div');
-          chatDiv.className = 'chat-session';
+        const chatDiv = document.createElement('div');
+        chatDiv.className = 'chat-session';
 
-          chatDiv.innerHTML = `
+        chatDiv.innerHTML = `
             <div class="prompt">🗣️ <strong>Prompt:</strong> ${chat.prompt}</div>
             ${chat.responses.map(r =>
-              `<div class="response">🤖 <strong>${r.model}</strong>: ${r.content}</div>`
+            `<div class="response">🤖 <strong>${r.model}</strong>: ${r.content}</div>`
             ).join('')}
-          `;
+        `;
 
-          resultsDiv.appendChild(chatDiv);
+        resultsDiv.appendChild(chatDiv);
         });
-      } catch (err) {
+    } catch (err) {
         console.error(err);
-        resultsDiv.innerHTML = `<p style="color:red;">Error fetching results: ${err.message}</p>`;
-      }
+        resultsDiv.innerHTML = `<p style="color:red;">Not logged in or server error. Redirecting...</p>`;
+        setTimeout(() => {
+        window.location.href = '/login.html';
+        }, 1500);
     }
+    }
+
+    // Run on page load
+    loadUser();
   </script>
 </body>
 </html>
