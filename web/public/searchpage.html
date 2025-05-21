@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Search Chats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-left: 5px;
+    }
+    .chat-session {
+      background: white;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .prompt {
+      font-weight: bold;
+    }
+    .response {
+      margin-left: 10px;
+    }
+    #usernameDisplay {
+      margin-top: 10px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Search Your Chat History</h1>
+
+  <button onclick="checkUser()">Who is logged in?</button>
+  <div id="usernameDisplay"></div>
+
+  <br/><br/>
+
+  <input type="text" id="keyword" placeholder="Enter keyword..." />
+  <button onclick="search()">Search</button>
+
+  <div id="results"></div>
+
+  <script>
+    async function checkUser() {
+      try {
+        const res = await fetch('/api/whoaminame');
+        const data = await res.json();
+        const display = document.getElementById('usernameDisplay');
+        if (data.loggedIn) {
+          display.textContent = `👤 Logged in as: ${data.username}`;
+        } else {
+          display.textContent = "❌ Not logged in.";
+        }
+      } catch (err) {
+        console.error('Error checking login:', err);
+        document.getElementById('usernameDisplay').textContent = "Error checking login.";
+      }
+    }
+
+    async function search() {
+      const keyword = document.getElementById("keyword").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = '';
+
+      if (!keyword) {
+        resultsDiv.innerHTML = "<p>Please enter a keyword.</p>";
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/search?keyword=${encodeURIComponent(keyword)}`);
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = "<p>No results found.</p>";
+          return;
+        }
+
+        data.forEach(chat => {
+          const chatDiv = document.createElement('div');
+          chatDiv.className = 'chat-session';
+
+          chatDiv.innerHTML = `
+            <div class="prompt">🗣️ <strong>Prompt:</strong> ${chat.prompt}</div>
+            ${chat.responses.map(r =>
+              `<div class="response">🤖 <strong>${r.model}</strong>: ${r.content}</div>`
+            ).join('')}
+          `;
+
+          resultsDiv.appendChild(chatDiv);
+        });
+      } catch (err) {
+        console.error(err);
+        resultsDiv.innerHTML = `<p style="color:red;">Error fetching results: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

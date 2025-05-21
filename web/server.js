@@ -120,10 +120,10 @@ app.post('/logout', (req, res) => {
 });
 
 // Middleware to protect routes
-function isAuthenticated(req, res, next) {
-  if (req.session.userId) return next();
-  res.redirect('/login.html');
-}
+import isAuthenticated from './middleware/isAuthenticated.js';
+// Middleware to search for words and the birds
+import searchRoutes from './routes/searchFunction.js';
+app.use('/api', searchRoutes);
 
 // protect dashboard.html
 app.get('/dashboard.html', isAuthenticated, (req, res, next) => {

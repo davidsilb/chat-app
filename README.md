@@ -134,7 +134,8 @@ A multi-container application that combines:
 
 ```bash
 .
-├── docker-compose.yml             # Docker Compose setup (app + MongoDB)
+├── docker-compose.yml             # Docker Compose setup (app+MongoDB+cloudF)
+├── docker-compose.dev.yml         # Docker Compose dev wrapper (app+MongoDB+bb)
 ├── README.md                      # Project overview and instructions
 ├── .gitignore                     # Ignore .env
 ├── .env                           # YOU MAKE (not committed)
@@ -148,10 +149,12 @@ A multi-container application that combines:
     │   ├── index.html             # Main chat compiler UI using oldGroq.js
     │   ├── login.html             # Login page
     │   ├── register.html          # Register page
-    │   └── logos/                 # a cancer in this product
-    │       ├── cute_logo.png      # the only file that should be in here
+    │   └── logos/                 # a plagua in this product, full of slop
+    │       ├── cute_logo.png      #🐱the only file that should be in here🐱
     │       ├── asdlkj;fhgglk;jhdsfag;hlkjn # this slop makes me cry 
     │       ├── afdgdagaklj;adfgl;kjgfd;lkjaf # :'(
+    ├── middleware/
+    │   └── isAuthenticated.js     # Check for who is login, knock knock
     ├── mongo/
     │   └── ChatSession.js         # Mongoose schema (store chats)
     ├── models/
@@ -159,7 +162,10 @@ A multi-container application that combines:
     └── routes/
         ├── addTagToResponse.js    # tag msgs func, implemented in index
         ├── exportTxt.js           # Export chat history as .txt
-        └── groqHandler.js         # Handle single model chat completions
+        ├── groqHandler.js         # Handle single model chat completions
+        └── searchFuntion.js       # They said it could not be done
+                                   # they laughed at me
+                                   # WHO"S LAUGHING NOW!!!!
 ```
 
 ## Frontend Usage
