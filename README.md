@@ -96,7 +96,7 @@ A multi-container application that combines:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) (including Docker Compose)
 - A [Groq API key](https://console.groq.com/keys) (set in `.env` as `GROQ_API_KEY`)
 - SESSION_SECRET='a-password-you-set-for-privacy/encryption' (set in `.env`)
-- (Optional, not needed) A Cloudflare Tunnel token (set in `.env` as `CLOUDFLARED_TOKEN`)
+- (Optional) A Cloudflare Tunnel token (set in `.env` as `CLOUDFLARED_TOKEN`)
 
 ## Getting Started
 
@@ -107,11 +107,11 @@ A multi-container application that combines:
    cd chat-app
    ```
 
-2. **Create your `.env` file**
+2. **Create your `.env` file | only these three NEEDED**
 
    ```ini
    MONGO_URI=mongodb://mongo:27017/chatai
-   SESSION_SECRET=anything_in_here
+   SESSION_SECRET=you_can_put_anything_in_here
    GROQ_API_KEY=your_groq_api_key_here
    ```
 
