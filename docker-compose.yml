@@ -7,10 +7,12 @@ services:
     expose:
       - "3000"
     environment:
+      - NODE_ENV=production
       - GROQ_API_KEY=${GROQ_API_KEY}
       - MONGO_URI=${MONGO_URI}
       - SESSION_SECRET=${SESSION_SECRET}
-    restart: "no"
+      - USE_HTTPS=true
+    restart: "unless-stopped"
     init: true
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
@@ -32,7 +34,7 @@ services:
       web:
         condition: service_healthy
     command: tunnel --url http://web:3000
-    restart: "no"
+    restart: "unless-stopped"
     # profiles: ["tunnel"] # docker-compose --profile tunnel up --build
 volumes:
   mongo-data:

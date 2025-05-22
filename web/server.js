@@ -24,6 +24,10 @@ try {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+
+// Trust reverse proxy (Cloudflared) so secure cookies work
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "exports")));
@@ -48,8 +52,9 @@ app.use(session({
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 60 * 24  // 1 day
+    secure: process.env.USE_HTTPS === 'true',
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 * 24,
   }
 }));
 

@@ -1,9 +1,11 @@
 services:
   web:
+    restart: "no"
     healthcheck:
       disable: false
     environment:
       - NODE_ENV=development
+      - USE_HTTPS=false
 
   cloudflared:
     image: busybox

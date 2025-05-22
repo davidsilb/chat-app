@@ -5,6 +5,7 @@ A multi-container application that combines:
 1. **Chat AI Compiler** – A frontend interface to query multiple AI model endpoints concurrently, view responses in grid/list layouts, and export results to CSV.
 2. **Cloudflare tunnel** – a tunnel to push <http://0.0.0.0:3000> to public. (optional -> use dev mode to disable)
 3. **MongoDB** – a non-relational db to store stuff, using moongoose to interface with.
+4. **DEV mode** vs **PROD mode** - in DEV mode, HTTP works for logins; in PROD mode you can only use tunnel (HTTPS) to login
 
 ## DEV_Log
 
@@ -17,7 +18,7 @@ A multi-container application that combines:
 ~~-USE THHIS?~~ no one knows what this does, but it does do something
 <pre><code class="language-bash">docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build --force-recreate</code></pre></del>
 
-- old way (production way)
+- old way (production way) [still working]
 
    ```bash
    docker-compose up --build
@@ -27,16 +28,7 @@ A multi-container application that combines:
    docker-compose up --build  --no-cache
    ```
 
-- 4urINFO: “Don’t start `cloudflared` until `web` passes its healthcheck.”
-
-   ```bash
-   cloudflared:
-   depends_on:
-    web:
-      condition: service_healthy
-   ```
-
-- mongoDB has just been setup, testing done, saves to db; testing steps below
+- MongoDB; testing steps below
 
    ```bash
    docker exec -it mongo-db mongosh
@@ -58,7 +50,7 @@ A multi-container application that combines:
    db.users.find().pretty()
    ```
 
-- ~~Delete/rebuild BOTH Cloudflared and Chat AI Compiler containers after each run to avoid tunnel not working on new runs. Can also delete in Docker Desktop if you are using GUI tools.~~ FIXED!!! docker compose down is now working with exit code 0 on both containers
+- Dev HELP (run these to fix things)
 
 - 1.commands to clear up docker issues
 
@@ -150,9 +142,10 @@ A multi-container application that combines:
     │   ├── register.html          # Register page
     │   └── logos/                 # a plagua in this product, full of slop
     │       ├── cute_logo.png      #🐱the only file that should be in here🐱
-    │       ├── asdlkj;fhgglk;jhdsfag;hlkjn # this slop makes me cry 
-    │       ├── afdgdagaklj;adfgl;kjgfd;lkjaf # :'(
-    │
+    │       ├── logo1.jpg          # slop1
+    │       ├── logo2.jpg          # slop2
+    │       ├── whitelogo.jpg      # slop3
+    │       └── whitelogo2.jpg     # slop4
     ├── middleware/
     │   └── isAuthenticated.js     # Check for who is login, knock knock
     ├── mongo/
@@ -174,7 +167,8 @@ A multi-container application that combines:
 2. Enter your message and click **Send**.
 3. View responses in grid or list layout.
 4. Export the conversation and responses to CSV at any time.
-5. Leaderboard (beta, unfinished) - index.html contained, session contained
+5. Leaderboard (beta, unfinished) - index.html contained, session contained.
+6. Basic user chat search on searchpage.html - locked to users only.
 
 ## License
 
