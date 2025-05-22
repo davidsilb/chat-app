@@ -9,7 +9,7 @@ A multi-container application that combines:
 
 ## DEV_Log
 
-- build with this -> force dev mode ontop of release; busybox placeholder
+- force dev mode ontop of PROD -> use <http://localhost:3000/>
 
    ```bash
    docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
@@ -18,7 +18,7 @@ A multi-container application that combines:
 ~~-USE THHIS?~~ no one knows what this does, but it does do something
 <pre><code class="language-bash">docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build --force-recreate</code></pre></del>
 
-- old way (production way) [still working]
+- production use -> use tunnel URL, do not use localhost, logins not working
 
    ```bash
    docker-compose up --build
