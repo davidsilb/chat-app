@@ -27,6 +27,15 @@
       padding: 8px 12px;
       margin-left: 5px;
     }
+    mark {
+    background-color: #fff59d;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  mark strong {
+    font-weight: bold;
+    text-decoration: underline;
+  }
     .chat-session {
       background: white;
       padding: 12px;
@@ -113,11 +122,25 @@
         chatDiv.className = 'chat-session';
 
         function highlight(text, keyword) {
+          const escapedFull = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          const fullMatchRegex = new RegExp(`(${escapedFull})`, 'gi');
+
+          // First, bold & mark exact full match with tooltip
+          text = text.replace(fullMatchRegex, '<mark title="Exact match"><strong>$1</strong></mark>');
+
           const words = keyword.trim().split(/\s+/).map(w =>
             w.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
           );
-          const regex = new RegExp(`(${words.join('|')})`, 'gi');
-          return text.replace(regex, '<mark>$1</mark>');
+
+          if (words.length > 1) {
+            const partialRegex = new RegExp(`(${words.join('|')})`, 'gi');
+            // Now wrap remaining partials with <mark>, but avoid double-marking
+            text = text.replace(/(?![^<]*>)([^<]+)/g, segment =>
+              segment.replace(partialRegex, '<mark>$1</mark>')
+            );
+          }
+
+          return text;
         }
 
         chatDiv.innerHTML = `
