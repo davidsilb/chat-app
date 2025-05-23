@@ -4,13 +4,6 @@ const router = express.Router();
 import isAuthenticated from '../middleware/isAuthenticated.js';
 import ChatSession from '../mongo/ChatSession.js';
 
-function normalizeKeyword(keyword) {
-  return keyword
-    .replace(/\s+/g, ' ')          // collapse multiple spaces
-    .replace(/×/g, 'x')            // replace multiplication sign with 'x'
-    .replace(/\s*x\s*/gi, ' x ');  // normalize spacing around 'x'
-}
-
 router.get('/search', isAuthenticated, async (req, res) => {
   const { keyword } = req.query;
   const userId = req.session.userId;
