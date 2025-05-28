@@ -128,6 +128,7 @@ A multi-container application that combines:
 ├── docker-compose.yml             # Docker Compose setup (app+MongoDB+cloudF)
 ├── docker-compose.dev.yml         # Docker Compose dev wrapper (app+MongoDB+bb)
 ├── README.md                      # YOU ARE HERE
+├── LICENSE                        # MIT
 ├── .gitignore                     # Ignore .env
 ├── .env                           # YOU MAKE (not committed)
 ├── .env.example                   # A template for your personal .env setup
@@ -140,12 +141,12 @@ A multi-container application that combines:
     │   ├── index.html             # Main chat compiler UI using groqHandler.js
     │   ├── login.html             # Login page
     │   ├── register.html          # Register page
-    │   └── logos/                 # a plagua in this product, full of slop
-    │       ├── cute_logo.png      #🐱the only file that should be in here🐱
-    │       ├── logo1.jpg          # slop1
-    │       ├── logo2.jpg          # slop2
-    │       ├── whitelogo.jpg      # slop3
-    │       └── whitelogo2.jpg     # slop4
+    │   └── logos/                 # should be on a CDN 4real
+    │       ├── cute_logo.png      # 🐱
+    │       ├── logo1.jpg          # 🤪
+    │       ├── logo2.jpg          # 🤪
+    │       ├── whitelogo.jpg      # 🤪
+    │       └── whitelogo2.jpg     # 🤪
     ├── middleware/
     │   └── isAuthenticated.js     # Check for who is login, knock knock
     ├── mongo/
@@ -157,8 +158,8 @@ A multi-container application that combines:
     └── routes/
         ├── addTagToResponse.js    # tag msgs func, implemented in index.html
         ├── exportTxt.js           # Export chat history as .txt files
-        ├── groqHandler.js         # Handle groq
-        └── searchFuntion.js       # They said it could not be done
+        ├── groqHandler.js         # Handle groq calls
+        └── searchFuntion.js       # search DB of logged in, highlights
 ```
 
 ## Frontend Usage
