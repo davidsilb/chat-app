@@ -224,6 +224,11 @@
           <label><input type="checkbox" name="aiServices" value="meta-llama_llama-4-scout-17b-16e-instruct"> meta-llama/llama-4-scout-17b-16e-instruct</label>
         </div>
       </div>
+      <div style="margin-top: 1rem;">
+        <label for="timeoutSlider">AI Timeout (seconds):</label>
+        <input type="range" id="timeoutSlider" min="5" max="30" value="10" oninput="timeoutVal.textContent = this.value">
+        <span id="timeoutVal">10</span>s
+      </div>
       <div class="form-group">
         <label for="msg">Enter your message:</label>
         <input type="text" id="msg" class="form-control" placeholder="Say something..." />
@@ -336,10 +341,11 @@
 
       await Promise.all(selected.map(async svc => {
         try {
+          const timeoutValue = parseInt(document.getElementById("timeoutSlider").value, 10);
           const res = await fetch(modelEndpointMap[svc], {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message, timeout: timeoutValue })
           });
           const { reply, chatSessionId, responseId } = await res.json();
           const currentChatSessionId = chatSessionId;

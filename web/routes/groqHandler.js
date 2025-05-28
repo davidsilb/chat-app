@@ -8,7 +8,12 @@ export function groqHandler(modelName) {
     const userMessage = req.body.message;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 9000);
+    let userTimeout = parseInt(req.body.timeout, 10);
+    if (isNaN(userTimeout) || userTimeout < 5 || userTimeout > 30) {
+      userTimeout = 10;
+    }
+    console.log(`[groqHandler.js]: [${modelName}] TIMEOUT set to: ${userTimeout} seconds`);
+    const timeout = setTimeout(() => controller.abort(), userTimeout * 1000);
 
     try {
       const result = await fetch(
@@ -42,7 +47,7 @@ export function groqHandler(modelName) {
         return res.status(500).json({ reply: `No valid response from ${modelName}` });
       }
 
-      console.log(`[${modelName}] got reply`);
+      console.log(`[groqHandler.js] -> [${modelName}] got reply`);
 
       let finalUserId;
       try {
