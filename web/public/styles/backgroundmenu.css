@@ -1,0 +1,87 @@
+#BackgroundsArrow {
+  position: fixed;
+  top: 90px;
+  right: 0;
+  width: 120px;
+  height: 40px;
+  background-color: #007bff;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: pointer;
+  z-index: 1001;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+#BackgroundsArrow:hover {
+  background-color: #0056b3;
+}
+
+#BackgroundsText {
+  flex-grow: 1;
+}
+
+#BackgroundsIcon {
+  font-size: 18px;
+}
+
+/* Sliding panel using transform */
+
+#BackgroundPanel {
+  position: fixed;
+  top: 130px;
+  right: 0;
+  width: 260px;
+  height: 300px;
+  background-color: #f9f9f9;
+  border-left: 2px solid #ccc;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding: 10px;
+
+  /* Slide off screen to the right */
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+/* Slide in when open */
+#BackgroundPanel.open {
+  transform: translateX(0);
+}
+
+/* Optional: style table inside panel */
+#BackgroundPanel table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#BackgroundPanel th,
+#BackgroundPanel td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+#BackgroundPanel th {
+  background-color: #007bff;
+  color: white;
+}
+
+body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh; /* Ensures the body is at least the full viewport height */
+      background-image: 'none'; /* Path to the 1920x1080 image */
+      background-size: cover; /* Scales the image to cover the entire window */
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+}

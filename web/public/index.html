@@ -559,5 +559,13 @@ function openTagEditor(model, chatId, responseId) {
     document.getElementById('resetTheme').addEventListener('click', resetTheme);
     
   </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedBackground = localStorage.getItem('selectedBackground');
+      if (savedBackground) {
+        document.body.style.backgroundImage = `url(${savedBackground})`;
+      }
+    });
+  </script>
 </body>
 </html>

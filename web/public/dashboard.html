@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard</title>
+  <link rel="stylesheet" href="./styles/backgroundmenu.css">
   <style>
   .logo {
       position: fixed;
@@ -56,6 +57,33 @@
     <button id="searchHistory" class="btn btn-info" style="margin-left: 10px; margin-bottom: 20px;" onclick="window.location.href='/searchpage.html'">Search History</button>
     <p id="username"></p>
     <div id="chat-history"></div>
+    
+    <div id="BackgroundsArrow">
+    <span id="BackgroundsText">Backgrounds</span>
+    <span id="BackgroundsIcon">&#9664;</span>
+    </div>
+
+  <div id="BackgroundPanel">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Backgrounds</th>
+		  
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr onclick="setBackground('logos/logo2.jpg')">
+          <td>Background 1</td>
+        </tr>
+		    <tr onclick="setBackground('logos/whitelogo.jpg')">
+          <td>Background 1</td>
+        </tr>
+        <tr onclick="setBackground('logos/whitelogo2.jpg')">
+          <td>Background 1</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <script>
     async function showChats(data) {
@@ -203,7 +231,28 @@
       }
     });
   </script>    
+  <script>
+    const savedBackground = localStorage.getItem('selectedBackground');
+    if (savedBackground) {
+      document.body.style.backgroundImage = `url(${savedBackground})`;
+    }
+    const panel = document.getElementById('BackgroundPanel');
+    const toggle = document.getElementById('BackgroundsArrow');
   
+    toggle.addEventListener('click', () => {
+    panel.classList.toggle('open');
+    const icon = document.getElementById('BackgroundsIcon');
+    icon.innerHTML = panel.classList.contains('open') ? '&#9654;' : '&#9664;';
+     // Retrieve saved background from localStorage
+    
+    });
+
+    function setBackground(imageUrl) {
+      localStorage.setItem('selectedBackground', imageUrl);
+      document.body.style.backgroundImage = `url(${imageUrl})`;
+    }
+
+ </script>
   
 </body>
 </html>
