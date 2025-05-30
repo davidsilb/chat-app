@@ -81,6 +81,9 @@
         <tr onclick="setBackground('logos/whitelogo2.jpg')">
           <td>Background 1</td>
         </tr>
+        <tr onclick="resetBackground()">
+        <td>Reset to Default</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -250,6 +253,11 @@
     function setBackground(imageUrl) {
       localStorage.setItem('selectedBackground', imageUrl);
       document.body.style.backgroundImage = `url(${imageUrl})`;
+    }
+
+    function resetBackground() {
+      localStorage.removeItem('selectedBackground');
+      document.body.style.backgroundImage = '';
     }
 
  </script>
